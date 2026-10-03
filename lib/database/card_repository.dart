@@ -1,3 +1,4 @@
+import 'package:flashcard_app/model/deck_card.dart';
 import '../model/card.dart';
 import 'app_database.dart';
 
@@ -29,13 +30,11 @@ class CardRepository {
   Future<List<Flashcard>> readCardsByDeck(int deckId) async {
     final db = await AppDatabase.instance.database;
 
-    final orderBy = '${CardFields.time} ASC';
+    final orderBy = '$tableDecksCard.${DeckCardFields.time} ASC';
 
-    final result = await db.query(
-      tableCards,
-      orderBy: orderBy,
-      where: '${CardFields.deckId} = ?',
-      whereArgs: [deckId],
+    final result = await db.rawQuery(
+      'SELECT $tableCards.* FROM $tableCards JOIN $tableDecksCard ON $tableCards.${CardFields.id} = $tableDecksCard.${DeckCardFields.cardId} WHERE $tableDecksCard.${DeckCardFields.deckId} = ? ORDER BY $orderBy',
+      [deckId],
     );
 
     return result.map((json) => Flashcard.fromJson(json)).toList();

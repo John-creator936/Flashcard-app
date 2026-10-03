@@ -1,5 +1,6 @@
 import 'package:flashcard_app/model/card.dart';
 import 'package:flashcard_app/model/deck.dart';
+import 'package:flashcard_app/model/deck_card.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -49,13 +50,24 @@ CREATE TABLE $tableDecks (
     await db.execute('''
 CREATE TABLE $tableCards ( 
   ${CardFields.id} $idType, 
-  ${CardFields.deckId} $integerType, 
   ${CardFields.term} $textType,
   ${CardFields.definition} $textType,
-  ${CardFields.time} $textType,
-  FOREIGN KEY (${CardFields.deckId})
+  ${CardFields.time} $textType
+  )
+''');
+
+    await db.execute('''
+CREATE TABLE $tableDecksCard ( 
+  ${DeckCardFields.deckId} $integerType, 
+  ${DeckCardFields.cardId} $integerType,
+  ${DeckCardFields.time} $textType,
+  FOREIGN KEY (${DeckCardFields.deckId})
     REFERENCES $tableDecks (${DeckFields.id})
-    ON DELETE CASCADE
+    ON DELETE CASCADE,
+  FOREIGN KEY (${DeckCardFields.cardId})
+    REFERENCES $tableCards (${CardFields.id})
+    ON DELETE CASCADE,
+  PRIMARY KEY (${DeckCardFields.deckId}, ${DeckCardFields.cardId})
   )
 ''');
   }

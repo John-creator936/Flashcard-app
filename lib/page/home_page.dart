@@ -1,5 +1,5 @@
 import 'package:flashcard_app/page/create_deck_page.dart';
-import 'package:flashcard_app/widget/deck_card.dart';
+import 'package:flashcard_app/widget/deck_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_app/model/deck.dart';
 import 'package:flashcard_app/database/deck_repository.dart';
@@ -46,7 +46,10 @@ class _HomePageState extends State<HomePage> {
               scrollDirection: Axis.horizontal,
               padding: EdgeInsets.symmetric(horizontal: 10),
               itemBuilder: (context, index) {
-                return DeckCard(deck: allDecks[index]);
+                return DeckTile(
+                  deck: allDecks[index],
+                  onDeckChanged: _loadDecks,
+                );
               },
               separatorBuilder: (context, index) {
                 return const SizedBox(width: 10);
