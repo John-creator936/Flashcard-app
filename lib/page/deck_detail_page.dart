@@ -4,6 +4,7 @@ import 'package:flashcard_app/model/card.dart';
 import 'package:flashcard_app/model/deck.dart';
 import 'package:flashcard_app/page/create_deck_page.dart';
 import 'package:flashcard_app/page/flashcard_study_page.dart';
+import 'package:flashcard_app/page/written_study_page.dart';
 import 'package:flutter/material.dart';
 
 class DeckDetailPage extends StatefulWidget {
@@ -68,10 +69,41 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => FlashcardStudyPage(flashcards: cards),
+          showModalBottomSheet(
+            context: context,
+            builder: (context) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    title: Text("Mode flashcard"),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              FlashcardStudyPage(flashcards: cards),
+                        ),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    title: Text("Mode écrit"),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              WrittenStudyPage(flashcards: cards),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           );
         },
