@@ -4,6 +4,7 @@ import 'package:flashcard_app/model/card.dart';
 import 'package:flashcard_app/model/deck.dart';
 import 'package:flashcard_app/page/create_deck_page.dart';
 import 'package:flashcard_app/page/flashcard_study_page.dart';
+import 'package:flashcard_app/page/multiple_choice_study_page.dart';
 import 'package:flashcard_app/page/written_study_page.dart';
 import 'package:flutter/material.dart';
 
@@ -77,7 +78,11 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ListTile(
+                    enabled: cards.isNotEmpty,
                     title: Text("Mode flashcard"),
+                    subtitle: cards.isNotEmpty
+                        ? null
+                        : Text("Ajoute au moins une carte"),
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -90,7 +95,11 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
                     },
                   ),
                   ListTile(
+                    enabled: cards.isNotEmpty,
                     title: Text("Mode écrit"),
+                    subtitle: cards.isNotEmpty
+                        ? null
+                        : Text("Ajoute au moins une carte"),
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -98,6 +107,23 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
                         MaterialPageRoute(
                           builder: (context) =>
                               WrittenStudyPage(flashcards: cards),
+                        ),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    enabled: cards.length > 1,
+                    title: Text("Mode QCM"),
+                    subtitle: cards.length > 1
+                        ? null
+                        : Text("Il faut au moins 2 cartes"),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              MultipleChoiceStudyPage(flashcards: cards),
                         ),
                       );
                     },
