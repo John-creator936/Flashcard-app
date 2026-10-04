@@ -1,4 +1,6 @@
 import 'package:flashcard_app/model/card.dart';
+import 'package:flashcard_app/widget/study_options.dart';
+import 'package:flashcard_app/widget/study_options_sheet.dart';
 import 'package:flutter/material.dart';
 
 class WrittenStudyPage extends StatefulWidget {
@@ -10,9 +12,17 @@ class WrittenStudyPage extends StatefulWidget {
 }
 
 class _WrittenStudyPageState extends State<WrittenStudyPage> {
+  late List<Flashcard> studyCards;
+  StudyOptions options = const StudyOptions();
   int currentCardIndex = 0;
   TextEditingController answerController = TextEditingController();
   bool? isCorrect;
+
+  @override
+  void initState() {
+    super.initState();
+    studyCards = widget.flashcards.toList();
+  }
 
   @override
   void dispose() {
@@ -22,8 +32,7 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
 
   void _checkAnswer() {
     setState(() {
-      if (answerController.text ==
-          widget.flashcards[currentCardIndex].definition) {
+      if (answerController.text == expectedAnswer) {
         isCorrect = true;
       } else {
         isCorrect = false;
@@ -32,7 +41,7 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
   }
 
   void _nextCard() {
-    if (currentCardIndex < widget.flashcards.length - 1) {
+    if (currentCardIndex < studyCards.length - 1) {
       setState(() {
         currentCardIndex++;
         isCorrect = null;
@@ -41,15 +50,68 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
     }
   }
 
+  void _onOptionsChanged(StudyOptions newOptions) {
+    setState(() {
+      if (options.shuffled == false && newOptions.shuffled == true) {
+        List<Flashcard> studiedCards = studyCards.sublist(0, currentCardIndex);
+        List<Flashcard> remainingCards = studyCards.sublist(currentCardIndex);
+        remainingCards.shuffle();
+        studyCards = [...studiedCards, ...remainingCards];
+        isCorrect = null;
+        answerController.text = "";
+      } else if (options.shuffled == true && newOptions.shuffled == false) {
+        List<Flashcard> studiedCards = studyCards.sublist(0, currentCardIndex);
+        List<Flashcard> remainingCards = studyCards.sublist(currentCardIndex);
+        Set<int> remainingIds = remainingCards
+            .map((remainingCard) => remainingCard.id!)
+            .toSet();
+        List<Flashcard> orderedRemainingCards = widget.flashcards
+            .where((flashcard) => remainingIds.contains(flashcard.id!))
+            .toList();
+        studyCards = [...studiedCards, ...orderedRemainingCards];
+        isCorrect = null;
+        answerController.text = "";
+      }
+      if (options.reversed != newOptions.reversed) {
+        isCorrect = null;
+        answerController.text = "";
+      }
+      options = newOptions;
+    });
+  }
+
+  String get questionText => options.reversed
+      ? studyCards[currentCardIndex].definition
+      : studyCards[currentCardIndex].term;
+  String get expectedAnswer => options.reversed
+      ? studyCards[currentCardIndex].term
+      : studyCards[currentCardIndex].definition;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Mode écrit")),
+      appBar: AppBar(
+        title: Text("Mode écrit"),
+        actions: [
+          IconButton(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (context) => StudyOptionsSheet(
+                  initialOptions: options,
+                  onChanged: _onOptionsChanged,
+                ),
+              );
+            },
+            icon: Icon(Icons.tune),
+          ),
+        ],
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(widget.flashcards[currentCardIndex].term),
+            Text(questionText),
             SizedBox(height: 20),
             Container(
               decoration: BoxDecoration(
@@ -70,9 +132,7 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
               ),
             ),
             (isCorrect == false)
-                ? Text(
-                    "La bonne réponse était : ${widget.flashcards[currentCardIndex].definition}",
-                  )
+                ? Text("La bonne réponse était : $expectedAnswer")
                 : const SizedBox.shrink(),
             (isCorrect != null)
                 ? IconButton(
