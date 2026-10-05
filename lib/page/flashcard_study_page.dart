@@ -41,6 +41,8 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
     }
   }
 
+  // TODO: factoriser cette logique de mélange et de retour à l'ordre d'origine,
+  // répétée dans les trois pages de mode (flashcard, écrit, QCM).
   void _onOptionsChanged(StudyOptions newOptions) {
     setState(() {
       if (options.shuffled == false && newOptions.shuffled == true) {

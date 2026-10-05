@@ -82,6 +82,10 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
     super.dispose();
   }
 
+  /// Enregistre le deck en cours de création ou de modification.
+  ///
+  /// Si `widget.existingDeck` est fourni, le deck est mis à jour (nouveau titre,
+  /// date de création conservée) ; sinon, un nouveau deck est créé.
   Future<void> _saveDeck() async {
     final DateTime createdTime = DateTime.now();
     final deckRepository = DeckRepository();

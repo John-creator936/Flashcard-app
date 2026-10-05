@@ -34,6 +34,11 @@ class AppDatabase {
     await db.execute('PRAGMA foreign_keys = ON');
   }
 
+  /// Crée les trois tables : cartes, decks et liens entre eux.
+  ///
+  /// Many-to-many : une carte peut appartenir à plusieurs decks grâce
+  /// aux tableaux de liasons 'decks_cards'. Sa clé primaire est composite
+  /// (`deckId`, `cardId`) : un lien ne peut donc pas exister deux fois.
   Future _createDB(Database db, int version) async {
     const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
     const textType = 'TEXT NOT NULL';
