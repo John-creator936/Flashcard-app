@@ -1,4 +1,5 @@
 import 'package:flashcard_app/model/card.dart';
+import 'package:flashcard_app/widget/study_end_view.dart';
 import 'package:flashcard_app/widget/study_options.dart';
 import 'package:flashcard_app/widget/study_options_sheet.dart';
 import 'package:flutter/material.dart';
@@ -13,10 +14,12 @@ class WrittenStudyPage extends StatefulWidget {
 
 class _WrittenStudyPageState extends State<WrittenStudyPage> {
   late List<Flashcard> studyCards;
+  List<Flashcard> failedCards = [];
   StudyOptions options = const StudyOptions();
   int currentCardIndex = 0;
   TextEditingController answerController = TextEditingController();
   bool? isCorrect;
+  bool isFinished = false;
 
   @override
   void initState() {
@@ -41,13 +44,18 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
   }
 
   void _nextCard() {
-    if (currentCardIndex < studyCards.length - 1) {
-      setState(() {
+    setState(() {
+      if (isCorrect == false) {
+        failedCards.add(studyCards[currentCardIndex]);
+      }
+      if (currentCardIndex < studyCards.length - 1) {
         currentCardIndex++;
         isCorrect = null;
         answerController.text = "";
-      });
-    }
+      } else {
+        isFinished = true;
+      }
+    });
   }
 
   void _onOptionsChanged(StudyOptions newOptions) {
@@ -80,6 +88,20 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
     });
   }
 
+  void _retryFailedCards() {
+    setState(() {
+      studyCards = failedCards.toList();
+      failedCards = [];
+      currentCardIndex = 0;
+      isCorrect = null;
+      isFinished = false;
+      answerController.text = "";
+      if (options.shuffled) {
+        studyCards.shuffle();
+      }
+    });
+  }
+
   String get questionText => options.reversed
       ? studyCards[currentCardIndex].definition
       : studyCards[currentCardIndex].term;
@@ -94,55 +116,70 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
         title: Text("Mode écrit"),
         actions: [
           IconButton(
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                builder: (context) => StudyOptionsSheet(
-                  initialOptions: options,
-                  onChanged: _onOptionsChanged,
-                ),
-              );
-            },
+            onPressed: (!isFinished && isCorrect == null)
+                ? () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) => StudyOptionsSheet(
+                        initialOptions: options,
+                        onChanged: _onOptionsChanged,
+                      ),
+                    );
+                  }
+                : null,
             icon: Icon(Icons.tune),
           ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(questionText),
-            SizedBox(height: 20),
-            Container(
-              decoration: BoxDecoration(
-                border: (isCorrect == null)
-                    ? null
-                    : Border.all(color: isCorrect! ? Colors.green : Colors.red),
-                color: (isCorrect == null)
-                    ? null
-                    : (isCorrect!
-                          ? Colors.green.withValues(alpha: 0.2)
-                          : Colors.red.withValues(alpha: 0.2)),
-              ),
-              child: Row(
+      body: (isFinished)
+          ? StudyEndView(
+              correctCount: studyCards.length - failedCards.length,
+              totalCount: studyCards.length,
+              onRetryFailed: failedCards.isEmpty ? null : _retryFailedCards,
+            )
+          : Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Expanded(child: TextField(controller: answerController)),
-                  IconButton(onPressed: _checkAnswer, icon: Icon(Icons.check)),
+                  Text(questionText),
+                  SizedBox(height: 20),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: (isCorrect == null)
+                          ? null
+                          : Border.all(
+                              color: isCorrect! ? Colors.green : Colors.red,
+                            ),
+                      color: (isCorrect == null)
+                          ? null
+                          : (isCorrect!
+                                ? Colors.green.withValues(alpha: 0.2)
+                                : Colors.red.withValues(alpha: 0.2)),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(controller: answerController),
+                        ),
+                        IconButton(
+                          onPressed: (isCorrect == null) ? _checkAnswer : null,
+                          icon: Icon(Icons.check),
+                        ),
+                      ],
+                    ),
+                  ),
+                  (isCorrect == false)
+                      ? Text("La bonne réponse était : $expectedAnswer")
+                      : const SizedBox.shrink(),
+                  (isCorrect != null)
+                      ? IconButton(
+                          onPressed: _nextCard,
+                          icon: Icon(Icons.navigate_next),
+                        )
+                      : const SizedBox.shrink(),
                 ],
               ),
             ),
-            (isCorrect == false)
-                ? Text("La bonne réponse était : $expectedAnswer")
-                : const SizedBox.shrink(),
-            (isCorrect != null)
-                ? IconButton(
-                    onPressed: _nextCard,
-                    icon: Icon(Icons.navigate_next),
-                  )
-                : const SizedBox.shrink(),
-          ],
-        ),
-      ),
     );
   }
 }

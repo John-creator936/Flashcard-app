@@ -1,4 +1,5 @@
 import 'package:flashcard_app/model/card.dart';
+import 'package:flashcard_app/widget/study_end_view.dart';
 import 'package:flashcard_app/widget/study_options.dart';
 import 'package:flashcard_app/widget/study_options_sheet.dart';
 import 'package:flutter/material.dart';
@@ -15,9 +16,11 @@ class MultipleChoiceStudyPage extends StatefulWidget {
 class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
   late List<Flashcard> studyCards;
   late List<String> choices;
+  List<Flashcard> failedCards = [];
   StudyOptions options = const StudyOptions();
   int currentCardIndex = 0;
   String? selectedChoice;
+  bool isFinished = false;
 
   @override
   void initState() {
@@ -27,13 +30,32 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
   }
 
   void _nextCard() {
-    if (currentCardIndex < studyCards.length - 1) {
-      setState(() {
+    setState(() {
+      if (selectedChoice != expectedAnswer) {
+        failedCards.add(studyCards[currentCardIndex]);
+      }
+      if (currentCardIndex < studyCards.length - 1) {
         currentCardIndex++;
         selectedChoice = null;
         choices = _buildChoices();
-      });
-    }
+      } else {
+        isFinished = true;
+      }
+    });
+  }
+
+  void _retryFailedCards() {
+    setState(() {
+      studyCards = failedCards.toList();
+      failedCards = [];
+      currentCardIndex = 0;
+      isFinished = false;
+      selectedChoice = null;
+      if (options.shuffled) {
+        studyCards.shuffle();
+      }
+      choices = _buildChoices();
+    });
   }
 
   List<String> _buildChoices() {
@@ -105,69 +127,80 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
         title: Text("Mode QCM"),
         actions: [
           IconButton(
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                builder: (context) => StudyOptionsSheet(
-                  initialOptions: options,
-                  onChanged: _onOptionsChanged,
-                ),
-              );
-            },
+            onPressed: (!isFinished && selectedChoice == null)
+                ? () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) => StudyOptionsSheet(
+                        initialOptions: options,
+                        onChanged: _onOptionsChanged,
+                      ),
+                    );
+                  }
+                : null,
             icon: Icon(Icons.tune),
           ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(questionText),
-            SizedBox(height: 50),
-            ...List.generate(
-              choices.length,
-              (index) => GestureDetector(
-                onTap: () {
-                  if (selectedChoice == null) {
-                    setState(() {
-                      selectedChoice = choices[index];
-                    });
-                  }
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(20),
-                  margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: _colorFor(choices[index]),
-                    border: Border.all(
-                      color: const Color.fromARGB(115, 237, 231, 231),
-                    ),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Text(choices[index]),
-                ),
-              ),
-            ),
-            (selectedChoice != null)
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 5,
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _nextCard,
-                        child: Text("Continuer"),
+      body: (isFinished)
+          ? StudyEndView(
+              correctCount: studyCards.length - failedCards.length,
+              totalCount: studyCards.length,
+              onRetryFailed: failedCards.isEmpty ? null : _retryFailedCards,
+            )
+          : Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(questionText),
+                  SizedBox(height: 50),
+                  ...List.generate(
+                    choices.length,
+                    (index) => GestureDetector(
+                      onTap: () {
+                        if (selectedChoice == null) {
+                          setState(() {
+                            selectedChoice = choices[index];
+                          });
+                        }
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(20),
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 5,
+                        ),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: _colorFor(choices[index]),
+                          border: Border.all(
+                            color: const Color.fromARGB(115, 237, 231, 231),
+                          ),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Text(choices[index]),
                       ),
                     ),
-                  )
-                : const SizedBox.shrink(),
-          ],
-        ),
-      ),
+                  ),
+                  (selectedChoice != null)
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 5,
+                          ),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _nextCard,
+                              child: Text("Continuer"),
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ],
+              ),
+            ),
     );
   }
 }
