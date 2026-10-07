@@ -88,9 +88,9 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
     });
   }
 
-  void _retryFailedCards() {
+  void _startRound(List<Flashcard> cards) {
     setState(() {
-      studyCards = failedCards.toList();
+      studyCards = cards.toList();
       failedCards = [];
       currentCardIndex = 0;
       isCorrect = null;
@@ -101,6 +101,9 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
       }
     });
   }
+
+  void _retryFailedCards() => _startRound(failedCards);
+  void _resetSession() => _startRound(widget.flashcards);
 
   String get questionText => options.reversed
       ? studyCards[currentCardIndex].definition
@@ -123,6 +126,7 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
                       builder: (context) => StudyOptionsSheet(
                         initialOptions: options,
                         onChanged: _onOptionsChanged,
+                        onReset: _resetSession,
                       ),
                     );
                   }
@@ -136,6 +140,7 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
               correctCount: studyCards.length - failedCards.length,
               totalCount: studyCards.length,
               onRetryFailed: failedCards.isEmpty ? null : _retryFailedCards,
+              onReset: _resetSession,
             )
           : Center(
               child: Column(

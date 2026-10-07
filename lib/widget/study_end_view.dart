@@ -4,11 +4,14 @@ class StudyEndView extends StatefulWidget {
   final int correctCount;
   final int totalCount;
   final VoidCallback? onRetryFailed;
+  final VoidCallback onReset;
+
   const StudyEndView({
     super.key,
     required this.correctCount,
     required this.totalCount,
     this.onRetryFailed,
+    required this.onReset,
   });
 
   @override
@@ -28,10 +31,20 @@ class _StudyEndViewState extends State<StudyEndView> {
           Text('Score ${widget.correctCount} / ${widget.totalCount}'),
           (widget.onRetryFailed == null)
               ? const SizedBox.shrink()
-              : IconButton(
-                  onPressed: widget.onRetryFailed,
-                  icon: Icon(Icons.restart_alt),
+              : SizedBox(
+                  width: 250,
+                  child: ElevatedButton(
+                    onPressed: widget.onRetryFailed,
+                    child: Text("Revoir les cartes ratées"),
+                  ),
                 ),
+          SizedBox(
+            width: 250,
+            child: ElevatedButton(
+              onPressed: widget.onReset,
+              child: Text("Réinitialiser", style: TextStyle(color: Colors.red)),
+            ),
+          ),
         ],
       ),
     );

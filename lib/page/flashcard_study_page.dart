@@ -69,9 +69,9 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
     });
   }
 
-  void _retryFailedCards() {
+  void _startRound(List<Flashcard> cards) {
     setState(() {
-      studyCards = failedCards.toList();
+      studyCards = cards.toList();
       failedCards = [];
       currentCardIndex = 0;
       isFlipped = false;
@@ -81,6 +81,9 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
       }
     });
   }
+
+  void _retryFailedCards() => _startRound(failedCards);
+  void _resetSession() => _startRound(widget.flashcards);
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +100,7 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
                       builder: (context) => StudyOptionsSheet(
                         initialOptions: options,
                         onChanged: _onOptionsChanged,
+                        onReset: _resetSession,
                       ),
                     );
                   },
@@ -109,6 +113,7 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
               correctCount: studyCards.length - failedCards.length,
               totalCount: studyCards.length,
               onRetryFailed: failedCards.isEmpty ? null : _retryFailedCards,
+              onReset: _resetSession,
             )
           : Center(
               child: Column(

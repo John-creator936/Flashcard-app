@@ -44,19 +44,22 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
     });
   }
 
-  void _retryFailedCards() {
+  void _startRound(List<Flashcard> cards) {
     setState(() {
-      studyCards = failedCards.toList();
+      studyCards = cards.toList();
       failedCards = [];
       currentCardIndex = 0;
-      isFinished = false;
       selectedChoice = null;
+      isFinished = false;
       if (options.shuffled) {
         studyCards.shuffle();
       }
       choices = _buildChoices();
     });
   }
+
+  void _retryFailedCards() => _startRound(failedCards);
+  void _resetSession() => _startRound(widget.flashcards);
 
   List<String> _buildChoices() {
     List<String> allAnswers = widget.flashcards
@@ -134,6 +137,7 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
                       builder: (context) => StudyOptionsSheet(
                         initialOptions: options,
                         onChanged: _onOptionsChanged,
+                        onReset: _resetSession,
                       ),
                     );
                   }
@@ -147,6 +151,7 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
               correctCount: studyCards.length - failedCards.length,
               totalCount: studyCards.length,
               onRetryFailed: failedCards.isEmpty ? null : _retryFailedCards,
+              onReset: _resetSession,
             )
           : Center(
               child: Column(
