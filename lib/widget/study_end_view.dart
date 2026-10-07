@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class StudyEndView extends StatefulWidget {
+class StudyEndView extends StatelessWidget {
   final int correctCount;
   final int totalCount;
   final VoidCallback? onRetryFailed;
@@ -15,33 +15,26 @@ class StudyEndView extends StatefulWidget {
   });
 
   @override
-  State<StudyEndView> createState() => _StudyEndViewState();
-}
-
-class _StudyEndViewState extends State<StudyEndView> {
-  @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          LinearProgressIndicator(
-            value: widget.correctCount / widget.totalCount,
-          ),
-          Text('Score ${widget.correctCount} / ${widget.totalCount}'),
-          (widget.onRetryFailed == null)
+          LinearProgressIndicator(value: correctCount / totalCount),
+          Text('Score $correctCount / $totalCount'),
+          (onRetryFailed == null)
               ? const SizedBox.shrink()
               : SizedBox(
                   width: 250,
                   child: ElevatedButton(
-                    onPressed: widget.onRetryFailed,
+                    onPressed: onRetryFailed,
                     child: Text("Revoir les cartes ratées"),
                   ),
                 ),
           SizedBox(
             width: 250,
             child: ElevatedButton(
-              onPressed: widget.onReset,
+              onPressed: onReset,
               child: Text("Réinitialiser", style: TextStyle(color: Colors.red)),
             ),
           ),
