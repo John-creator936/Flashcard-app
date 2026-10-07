@@ -6,7 +6,12 @@ import 'package:flutter/material.dart';
 
 class WrittenStudyPage extends StatefulWidget {
   final List<Flashcard> flashcards;
-  const WrittenStudyPage({super.key, required this.flashcards});
+  final int deckId;
+  const WrittenStudyPage({
+    super.key,
+    required this.flashcards,
+    required this.deckId,
+  });
 
   @override
   State<WrittenStudyPage> createState() => _WrittenStudyPageState();
@@ -25,6 +30,7 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
   void initState() {
     super.initState();
     studyCards = widget.flashcards.toList();
+    _loadOptions();
   }
 
   @override
@@ -86,6 +92,7 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
       }
       options = newOptions;
     });
+    options.save(widget.deckId);
   }
 
   void _startRound(List<Flashcard> cards) {
@@ -96,6 +103,17 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
       isCorrect = null;
       isFinished = false;
       answerController.text = "";
+      if (options.shuffled) {
+        studyCards.shuffle();
+      }
+    });
+  }
+
+  Future<void> _loadOptions() async {
+    final loadedOptions = await StudyOptions.load(widget.deckId);
+    if (!mounted) return;
+    setState(() {
+      options = loadedOptions;
       if (options.shuffled) {
         studyCards.shuffle();
       }

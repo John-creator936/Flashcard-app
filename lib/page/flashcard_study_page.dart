@@ -6,7 +6,12 @@ import 'package:flutter/material.dart';
 
 class FlashcardStudyPage extends StatefulWidget {
   final List<Flashcard> flashcards;
-  const FlashcardStudyPage({super.key, required this.flashcards});
+  final int deckId;
+  const FlashcardStudyPage({
+    super.key,
+    required this.flashcards,
+    required this.deckId,
+  });
 
   @override
   State<FlashcardStudyPage> createState() => _FlashcardStudyPageState();
@@ -24,6 +29,7 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
   void initState() {
     super.initState();
     studyCards = widget.flashcards.toList();
+    _loadOptions();
   }
 
   void _classifyCard(bool isKnown) {
@@ -67,6 +73,7 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
       }
       options = newOptions;
     });
+    options.save(widget.deckId);
   }
 
   void _startRound(List<Flashcard> cards) {
@@ -84,6 +91,17 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
 
   void _retryFailedCards() => _startRound(failedCards);
   void _resetSession() => _startRound(widget.flashcards);
+
+  Future<void> _loadOptions() async {
+    final loadedOptions = await StudyOptions.load(widget.deckId);
+    if (!mounted) return;
+    setState(() {
+      options = loadedOptions;
+      if (options.shuffled) {
+        studyCards.shuffle();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

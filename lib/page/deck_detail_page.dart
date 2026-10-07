@@ -88,8 +88,10 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              FlashcardStudyPage(flashcards: cards),
+                          builder: (context) => FlashcardStudyPage(
+                            flashcards: cards,
+                            deckId: currentDeck.id!,
+                          ),
                         ),
                       );
                     },
@@ -105,8 +107,10 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              WrittenStudyPage(flashcards: cards),
+                          builder: (context) => WrittenStudyPage(
+                            flashcards: cards,
+                            deckId: currentDeck.id!,
+                          ),
                         ),
                       );
                     },
@@ -122,8 +126,10 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              MultipleChoiceStudyPage(flashcards: cards),
+                          builder: (context) => MultipleChoiceStudyPage(
+                            flashcards: cards,
+                            deckId: currentDeck.id!,
+                          ),
                         ),
                       );
                     },

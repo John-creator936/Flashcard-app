@@ -6,7 +6,12 @@ import 'package:flutter/material.dart';
 
 class MultipleChoiceStudyPage extends StatefulWidget {
   final List<Flashcard> flashcards;
-  const MultipleChoiceStudyPage({super.key, required this.flashcards});
+  final int deckId;
+  const MultipleChoiceStudyPage({
+    super.key,
+    required this.flashcards,
+    required this.deckId,
+  });
 
   @override
   State<MultipleChoiceStudyPage> createState() =>
@@ -26,6 +31,7 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
   void initState() {
     super.initState();
     studyCards = widget.flashcards.toList();
+    _loadOptions();
     choices = _buildChoices();
   }
 
@@ -100,6 +106,7 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
       bool shuffleChanged = options.shuffled != newOptions.shuffled;
       bool reversedChanged = options.reversed != newOptions.reversed;
       options = newOptions;
+      options.save(widget.deckId);
       if (options.shuffled == true && shuffleChanged) {
         List<Flashcard> studiedCards = studyCards.sublist(0, currentCardIndex);
         List<Flashcard> remainingCards = studyCards.sublist(currentCardIndex);
@@ -120,6 +127,18 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
         selectedChoice = null;
         choices = _buildChoices();
       }
+    });
+  }
+
+  Future<void> _loadOptions() async {
+    final loadedOptions = await StudyOptions.load(widget.deckId);
+    if (!mounted) return;
+    setState(() {
+      options = loadedOptions;
+      if (options.shuffled) {
+        studyCards.shuffle();
+      }
+      choices = _buildChoices();
     });
   }
 
