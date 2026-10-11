@@ -27,6 +27,7 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
   bool isFlipped = false;
   bool isFinished = false;
   static const _mode = 'flashcard';
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -141,6 +142,7 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
           studyCards.shuffle();
         }
       }
+      isLoading = false;
     });
   }
 
@@ -153,16 +155,87 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
     ).save(widget.deckId, _mode);
   }
 
+  Widget _buildBody() {
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+    if (isFinished) {
+      return StudyEndView(
+        correctCount: studyCards.length - failedCards.length,
+        totalCount: studyCards.length,
+        onRetryFailed: failedCards.isEmpty ? null : _retryFailedCards,
+        onReset: _resetSession,
+      );
+    }
+    return Center(
+      child: Column(
+        children: [
+          SizedBox(
+            width: 360,
+            child: Dismissible(
+              key: ValueKey(studyCards[currentCardIndex].id),
+              background: Container(
+                color: Colors.green,
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.only(left: 20),
+                child: const Icon(Icons.check, color: Colors.white),
+              ),
+              secondaryBackground: Container(
+                color: Colors.red,
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: 20),
+                child: const Icon(Icons.close, color: Colors.white),
+              ),
+              onDismissed: (direction) {
+                _classifyCard(direction == DismissDirection.startToEnd);
+              },
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isFlipped = !isFlipped;
+                  });
+                },
+                child: Container(
+                  width: 360,
+                  height: 600,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    color: Colors.white,
+                  ),
+                  child: (isFlipped != options.reversed)
+                      ? Text(
+                          studyCards[currentCardIndex].definition,
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight(400),
+                          ),
+                        )
+                      : Text(
+                          studyCards[currentCardIndex].term,
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight(400),
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Révision"),
+        title: Text("Mode Flashcard"),
         actions: [
           IconButton(
-            onPressed: (isFinished)
-                ? null
-                : () {
+            onPressed: (!isFinished && !isLoading)
+                ? () {
                     showModalBottomSheet(
                       context: context,
                       builder: (context) => StudyOptionsSheet(
@@ -171,76 +244,13 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
                         onReset: _resetSession,
                       ),
                     );
-                  },
+                  }
+                : null,
             icon: Icon(Icons.tune),
           ),
         ],
       ),
-      body: (isFinished)
-          ? StudyEndView(
-              correctCount: studyCards.length - failedCards.length,
-              totalCount: studyCards.length,
-              onRetryFailed: failedCards.isEmpty ? null : _retryFailedCards,
-              onReset: _resetSession,
-            )
-          : Center(
-              child: Column(
-                children: [
-                  SizedBox(
-                    width: 360,
-                    child: Dismissible(
-                      key: ValueKey(studyCards[currentCardIndex].id),
-                      background: Container(
-                        color: Colors.green,
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.only(left: 20),
-                        child: const Icon(Icons.check, color: Colors.white),
-                      ),
-                      secondaryBackground: Container(
-                        color: Colors.red,
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 20),
-                        child: const Icon(Icons.close, color: Colors.white),
-                      ),
-                      onDismissed: (direction) {
-                        _classifyCard(direction == DismissDirection.startToEnd);
-                      },
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            isFlipped = !isFlipped;
-                          });
-                        },
-                        child: Container(
-                          width: 360,
-                          height: 600,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Colors.white,
-                          ),
-                          child: (isFlipped != options.reversed)
-                              ? Text(
-                                  studyCards[currentCardIndex].definition,
-                                  style: TextStyle(
-                                    fontSize: 26,
-                                    fontWeight: FontWeight(400),
-                                  ),
-                                )
-                              : Text(
-                                  studyCards[currentCardIndex].term,
-                                  style: TextStyle(
-                                    fontSize: 26,
-                                    fontWeight: FontWeight(400),
-                                  ),
-                                ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+      body: _buildBody(),
     );
   }
 }

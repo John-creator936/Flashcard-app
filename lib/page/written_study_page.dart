@@ -28,6 +28,7 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
   bool? isCorrect;
   bool isFinished = false;
   static const _mode = 'written';
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -158,6 +159,7 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
           studyCards.shuffle();
         }
       }
+      isLoading = false;
     });
   }
 
@@ -180,6 +182,59 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
       ? studyCards[currentCardIndex].term
       : studyCards[currentCardIndex].definition;
 
+  Widget _buildBody() {
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+    if (isFinished) {
+      return StudyEndView(
+        correctCount: studyCards.length - failedCards.length,
+        totalCount: studyCards.length,
+        onRetryFailed: failedCards.isEmpty ? null : _retryFailedCards,
+        onReset: _resetSession,
+      );
+    }
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(questionText),
+          SizedBox(height: 20),
+          Container(
+            decoration: BoxDecoration(
+              border: (isCorrect == null)
+                  ? null
+                  : Border.all(color: isCorrect! ? Colors.green : Colors.red),
+              color: (isCorrect == null)
+                  ? null
+                  : (isCorrect!
+                        ? Colors.green.withValues(alpha: 0.2)
+                        : Colors.red.withValues(alpha: 0.2)),
+            ),
+            child: Row(
+              children: [
+                Expanded(child: TextField(controller: answerController)),
+                IconButton(
+                  onPressed: (isCorrect == null) ? _checkAnswer : null,
+                  icon: Icon(Icons.check),
+                ),
+              ],
+            ),
+          ),
+          (isCorrect == false)
+              ? Text("La bonne réponse était : $expectedAnswer")
+              : const SizedBox.shrink(),
+          (isCorrect != null)
+              ? IconButton(
+                  onPressed: _nextCard,
+                  icon: Icon(Icons.navigate_next),
+                )
+              : const SizedBox.shrink(),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -187,7 +242,7 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
         title: Text("Mode écrit"),
         actions: [
           IconButton(
-            onPressed: (!isFinished && isCorrect == null)
+            onPressed: (!isFinished && isCorrect == null && !isLoading)
                 ? () {
                     showModalBottomSheet(
                       context: context,
@@ -203,56 +258,7 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
           ),
         ],
       ),
-      body: (isFinished)
-          ? StudyEndView(
-              correctCount: studyCards.length - failedCards.length,
-              totalCount: studyCards.length,
-              onRetryFailed: failedCards.isEmpty ? null : _retryFailedCards,
-              onReset: _resetSession,
-            )
-          : Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(questionText),
-                  SizedBox(height: 20),
-                  Container(
-                    decoration: BoxDecoration(
-                      border: (isCorrect == null)
-                          ? null
-                          : Border.all(
-                              color: isCorrect! ? Colors.green : Colors.red,
-                            ),
-                      color: (isCorrect == null)
-                          ? null
-                          : (isCorrect!
-                                ? Colors.green.withValues(alpha: 0.2)
-                                : Colors.red.withValues(alpha: 0.2)),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(controller: answerController),
-                        ),
-                        IconButton(
-                          onPressed: (isCorrect == null) ? _checkAnswer : null,
-                          icon: Icon(Icons.check),
-                        ),
-                      ],
-                    ),
-                  ),
-                  (isCorrect == false)
-                      ? Text("La bonne réponse était : $expectedAnswer")
-                      : const SizedBox.shrink(),
-                  (isCorrect != null)
-                      ? IconButton(
-                          onPressed: _nextCard,
-                          icon: Icon(Icons.navigate_next),
-                        )
-                      : const SizedBox.shrink(),
-                ],
-              ),
-            ),
+      body: _buildBody(),
     );
   }
 }

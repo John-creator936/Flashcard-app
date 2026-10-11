@@ -29,13 +29,13 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
   String? selectedChoice;
   bool isFinished = false;
   static const _mode = 'mcq';
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     studyCards = widget.flashcards.toList();
     _loadOptions();
-    choices = _buildChoices();
   }
 
   void _nextCard() {
@@ -180,6 +180,7 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
         }
       }
       choices = _buildChoices();
+      isLoading = false;
     });
   }
 
@@ -192,6 +193,70 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
     ).save(widget.deckId, _mode);
   }
 
+  Widget _buildBody() {
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+    if (isFinished) {
+      return StudyEndView(
+        correctCount: studyCards.length - failedCards.length,
+        totalCount: studyCards.length,
+        onRetryFailed: failedCards.isEmpty ? null : _retryFailedCards,
+        onReset: _resetSession,
+      );
+    }
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(questionText),
+          SizedBox(height: 50),
+          ...List.generate(
+            choices.length,
+            (index) => GestureDetector(
+              onTap: () {
+                if (selectedChoice == null) {
+                  setState(() {
+                    selectedChoice = choices[index];
+                  });
+                }
+              },
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(20),
+                margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: _colorFor(choices[index]),
+                  border: Border.all(
+                    color: const Color.fromARGB(115, 237, 231, 231),
+                  ),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Text(choices[index]),
+              ),
+            ),
+          ),
+          (selectedChoice != null)
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 5,
+                  ),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _nextCard,
+                      child: Text("Continuer"),
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -199,7 +264,7 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
         title: Text("Mode QCM"),
         actions: [
           IconButton(
-            onPressed: (!isFinished && selectedChoice == null)
+            onPressed: (!isFinished && selectedChoice == null && !isLoading)
                 ? () {
                     showModalBottomSheet(
                       context: context,
@@ -215,66 +280,7 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
           ),
         ],
       ),
-      body: (isFinished)
-          ? StudyEndView(
-              correctCount: studyCards.length - failedCards.length,
-              totalCount: studyCards.length,
-              onRetryFailed: failedCards.isEmpty ? null : _retryFailedCards,
-              onReset: _resetSession,
-            )
-          : Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(questionText),
-                  SizedBox(height: 50),
-                  ...List.generate(
-                    choices.length,
-                    (index) => GestureDetector(
-                      onTap: () {
-                        if (selectedChoice == null) {
-                          setState(() {
-                            selectedChoice = choices[index];
-                          });
-                        }
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(20),
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 5,
-                        ),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: _colorFor(choices[index]),
-                          border: Border.all(
-                            color: const Color.fromARGB(115, 237, 231, 231),
-                          ),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Text(choices[index]),
-                      ),
-                    ),
-                  ),
-                  (selectedChoice != null)
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 5,
-                          ),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _nextCard,
-                              child: Text("Continuer"),
-                            ),
-                          ),
-                        )
-                      : const SizedBox.shrink(),
-                ],
-              ),
-            ),
+      body: _buildBody(),
     );
   }
 }
