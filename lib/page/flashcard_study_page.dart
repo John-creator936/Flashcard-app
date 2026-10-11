@@ -1,7 +1,9 @@
 import 'package:flashcard_app/model/card.dart';
+import 'package:flashcard_app/model/study_session.dart';
 import 'package:flashcard_app/widget/study_end_view.dart';
 import 'package:flashcard_app/widget/study_options.dart';
 import 'package:flashcard_app/widget/study_options_sheet.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class FlashcardStudyPage extends StatefulWidget {
@@ -24,6 +26,7 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
   int currentCardIndex = 0;
   bool isFlipped = false;
   bool isFinished = false;
+  static const _mode = 'flashcard';
 
   @override
   void initState() {
@@ -44,6 +47,20 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
         isFinished = true;
       }
     });
+    if (!isFinished) {
+      _saveSession();
+    } else if (failedCards.isEmpty) {
+      StudySession.clear(widget.deckId, _mode);
+    } else {
+      StudySession(
+        studyCardIds: failedCards.map((flashcard) => flashcard.id!).toList(),
+        currentCardIndex: 0,
+        failedCardIds: [],
+        deckCardIds: widget.flashcards
+            .map((flashcard) => flashcard.id!)
+            .toList(),
+      ).save(widget.deckId, _mode);
+    }
   }
 
   // TODO: factoriser cette logique de mélange et de retour à l'ordre d'origine,
@@ -74,6 +91,7 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
       options = newOptions;
     });
     options.save(widget.deckId);
+    _saveSession();
   }
 
   void _startRound(List<Flashcard> cards) {
@@ -87,6 +105,7 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
         studyCards.shuffle();
       }
     });
+    _saveSession();
   }
 
   void _retryFailedCards() => _startRound(failedCards);
@@ -94,13 +113,44 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
 
   Future<void> _loadOptions() async {
     final loadedOptions = await StudyOptions.load(widget.deckId);
+    final session = await StudySession.load(widget.deckId, _mode);
+    final isValid =
+        session != null &&
+        setEquals(
+          session.deckCardIds.toSet(),
+          widget.flashcards.map((flashcard) => flashcard.id!).toSet(),
+        ) &&
+        session.studyCardIds.isNotEmpty;
     if (!mounted) return;
     setState(() {
       options = loadedOptions;
-      if (options.shuffled) {
-        studyCards.shuffle();
+      if (isValid) {
+        final cardsById = {
+          for (final card in widget.flashcards) card.id!: card,
+        };
+        studyCards = session.studyCardIds.map((id) => cardsById[id]!).toList();
+        failedCards = session.failedCardIds
+            .map((id) => cardsById[id]!)
+            .toList();
+        currentCardIndex = session.currentCardIndex;
+      } else {
+        if (session != null) {
+          StudySession.clear(widget.deckId, _mode);
+        }
+        if (options.shuffled) {
+          studyCards.shuffle();
+        }
       }
     });
+  }
+
+  void _saveSession() {
+    StudySession(
+      studyCardIds: studyCards.map((flashcard) => flashcard.id!).toList(),
+      currentCardIndex: currentCardIndex,
+      failedCardIds: failedCards.map((flashcard) => flashcard.id!).toList(),
+      deckCardIds: widget.flashcards.map((flashcard) => flashcard.id!).toList(),
+    ).save(widget.deckId, _mode);
   }
 
   @override
