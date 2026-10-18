@@ -39,18 +39,7 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
     );
     setState(() {
       final List<EditableExistingCard> editableExistingCards = loadedCards
-          .map(
-            (loadedCard) => EditableExistingCard(
-              cardId: loadedCard.id!,
-              termController: TextEditingController(text: loadedCard.term),
-              definitionController: TextEditingController(
-                text: loadedCard.definition,
-              ),
-              originalTerm: loadedCard.term,
-              originalDefinition: loadedCard.definition,
-              originalCreatedTime: loadedCard.createdTime,
-            ),
-          )
+          .map((loadedCard) => EditableExistingCard(loadedCard))
           .toList();
       selectedExistingCards.addAll(editableExistingCards);
     });
@@ -125,20 +114,18 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
 
     for (int i = 0; i < selectedExistingCards.length; i++) {
       if (selectedExistingCards[i].termController.text !=
-              selectedExistingCards[i].originalTerm ||
+              selectedExistingCards[i].original.term ||
           selectedExistingCards[i].definitionController.text !=
-              selectedExistingCards[i].originalDefinition) {
-        final flashcard = Flashcard(
-          id: selectedExistingCards[i].cardId,
-          definition: selectedExistingCards[i].definitionController.text,
+              selectedExistingCards[i].original.definition) {
+        final flashcard = selectedExistingCards[i].original.copy(
           term: selectedExistingCards[i].termController.text,
-          createdTime: selectedExistingCards[i].originalCreatedTime,
+          definition: selectedExistingCards[i].definitionController.text,
         );
         await cardRepository.update(flashcard);
       }
       DeckCardLink link = DeckCardLink(
         deckId: savedDeck.id!,
-        cardId: selectedExistingCards[i].cardId,
+        cardId: selectedExistingCards[i].original.id!,
         createdTime: createdTime,
       );
       await DeckCardRepository().linkCardToDeck(link);
@@ -171,18 +158,8 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
                     final List<EditableExistingCard> editableExistingCards =
                         selectedCards
                             .map(
-                              (selectedCard) => EditableExistingCard(
-                                cardId: selectedCard.id!,
-                                termController: TextEditingController(
-                                  text: selectedCard.term,
-                                ),
-                                definitionController: TextEditingController(
-                                  text: selectedCard.definition,
-                                ),
-                                originalTerm: selectedCard.term,
-                                originalDefinition: selectedCard.definition,
-                                originalCreatedTime: selectedCard.createdTime,
-                              ),
+                              (selectedCard) =>
+                                  EditableExistingCard(selectedCard),
                             )
                             .toList();
                     setState(() {
@@ -226,7 +203,7 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
                   if (widget.existingDeck != null) {
                     await DeckCardRepository().unlinkCardFromDeck(
                       widget.existingDeck!.id!,
-                      selectedExistingCards[index].cardId,
+                      selectedExistingCards[index].original.id!,
                     );
                   }
                   setState(() {

@@ -27,12 +27,20 @@ class Flashcard {
   final String term;
   final String definition;
   final DateTime createdTime;
+  final double easeFactor;
+  final double points;
+  final double intervalDays;
+  final DateTime? lastReviewedTime;
 
   const Flashcard({
     this.id,
     required this.term,
     required this.definition,
     required this.createdTime,
+    this.easeFactor = 2.5,
+    this.points = 0,
+    this.intervalDays = 0,
+    this.lastReviewedTime,
   });
 
   Flashcard copy({
@@ -40,11 +48,19 @@ class Flashcard {
     String? term,
     String? definition,
     DateTime? createdTime,
+    double? easeFactor,
+    double? points,
+    double? intervalDays,
+    DateTime? lastReviewedTime,
   }) => Flashcard(
     id: id ?? this.id,
     term: term ?? this.term,
     definition: definition ?? this.definition,
     createdTime: createdTime ?? this.createdTime,
+    easeFactor: easeFactor ?? this.easeFactor,
+    points: points ?? this.points,
+    intervalDays: intervalDays ?? this.intervalDays,
+    lastReviewedTime: lastReviewedTime ?? this.lastReviewedTime,
   );
 
   static Flashcard fromJson(Map<String, Object?> json) => Flashcard(
@@ -52,6 +68,12 @@ class Flashcard {
     term: json[CardFields.term] as String,
     definition: json[CardFields.definition] as String,
     createdTime: DateTime.parse(json[CardFields.time] as String),
+    easeFactor: (json[CardFields.easeFactor] as num).toDouble(),
+    points: (json[CardFields.points] as num).toDouble(),
+    intervalDays: (json[CardFields.intervalDays] as num).toDouble(),
+    lastReviewedTime: (json[CardFields.lastReviewedTime] == null)
+        ? null
+        : DateTime.parse(json[CardFields.lastReviewedTime] as String),
   );
 
   Map<String, Object?> toJson() => {
@@ -59,5 +81,9 @@ class Flashcard {
     CardFields.term: term,
     CardFields.definition: definition,
     CardFields.time: createdTime.toIso8601String(),
+    CardFields.easeFactor: easeFactor,
+    CardFields.points: points,
+    CardFields.intervalDays: intervalDays,
+    CardFields.lastReviewedTime: lastReviewedTime?.toIso8601String(),
   };
 }

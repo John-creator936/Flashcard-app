@@ -1,19 +1,12 @@
+import 'package:flashcard_app/model/card.dart';
 import 'package:flutter/material.dart';
 
 class EditableExistingCard {
-  final int cardId;
+  final Flashcard original;
   final TextEditingController termController;
   final TextEditingController definitionController;
-  final String originalTerm;
-  final String originalDefinition;
-  final DateTime originalCreatedTime;
 
-  EditableExistingCard({
-    required this.cardId,
-    required this.termController,
-    required this.definitionController,
-    required this.originalTerm,
-    required this.originalDefinition,
-    required this.originalCreatedTime,
-  });
+  EditableExistingCard(this.original)
+    : termController = TextEditingController(text: original.term),
+      definitionController = TextEditingController(text: original.definition);
 }
