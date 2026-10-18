@@ -24,9 +24,10 @@ class AppDatabase {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDB,
       onConfigure: _onConfigure,
+      onUpgrade: _upgradeDB,
     );
   }
 
@@ -43,6 +44,7 @@ class AppDatabase {
     const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
     const textType = 'TEXT NOT NULL';
     const integerType = 'INTEGER NOT NULL';
+    const realType = 'REAL NOT NULL';
 
     await db.execute('''
 CREATE TABLE $tableDecks ( 
@@ -57,7 +59,11 @@ CREATE TABLE $tableCards (
   ${CardFields.id} $idType, 
   ${CardFields.term} $textType,
   ${CardFields.definition} $textType,
-  ${CardFields.time} $textType
+  ${CardFields.time} $textType,
+  ${CardFields.easeFactor} $realType DEFAULT 2.5,
+  ${CardFields.points} $realType DEFAULT 0,
+  ${CardFields.intervalDays} $realType DEFAULT 0,
+  ${CardFields.lastReviewedTime} TEXT
   )
 ''');
 
@@ -75,6 +81,28 @@ CREATE TABLE $tableDecksCard (
   PRIMARY KEY (${DeckCardFields.deckId}, ${DeckCardFields.cardId})
   )
 ''');
+  }
+
+  /// Met à jour la structure d'une base existante sans perdre les données.
+  ///
+  /// Chaque bloc `if (oldVersion < N)` correspond à une version.
+  /// Les anciens blocs ne doivent jamais être modifiés.
+  /// Version 2 : colonnes de la Révision (SM-2) dans `cards`.
+  Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute(
+        'ALTER TABLE $tableCards ADD COLUMN ${CardFields.easeFactor} REAL NOT NULL DEFAULT 2.5',
+      );
+      await db.execute(
+        'ALTER TABLE $tableCards ADD COLUMN ${CardFields.points} REAL NOT NULL DEFAULT 0',
+      );
+      await db.execute(
+        'ALTER TABLE $tableCards ADD COLUMN ${CardFields.intervalDays} REAL NOT NULL DEFAULT 0',
+      );
+      await db.execute(
+        'ALTER TABLE $tableCards ADD COLUMN ${CardFields.lastReviewedTime} TEXT',
+      );
+    }
   }
 
   Future close() async {

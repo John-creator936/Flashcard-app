@@ -2,14 +2,24 @@ final String tableCards = 'cards';
 
 class CardFields {
   static final List<String> values = [
-    /// Add all fields
-    id, term, definition, time,
+    id,
+    term,
+    definition,
+    time,
+    easeFactor,
+    points,
+    intervalDays,
+    lastReviewedTime,
   ];
 
   static final String id = '_id';
   static final String term = 'term';
   static final String definition = 'definition';
   static final String time = 'time';
+  static final String easeFactor = 'easeFactor';
+  static final String points = 'points';
+  static final String intervalDays = 'intervalDays';
+  static final String lastReviewedTime = 'lastReviewedTime';
 }
 
 class Flashcard {
