@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 class StudyOptionsSheet extends StatefulWidget {
   final StudyOptions initialOptions;
   final ValueChanged<StudyOptions> onChanged;
-  final VoidCallback onReset;
+  final VoidCallback? onReset;
 
   const StudyOptionsSheet({
     super.key,
     required this.initialOptions,
     required this.onChanged,
-    required this.onReset,
+    this.onReset,
   });
 
   @override
@@ -53,16 +53,21 @@ class _StudyOptionsSheetState extends State<StudyOptionsSheet> {
               widget.onChanged(options);
             },
           ),
-          SizedBox(
-            width: 200,
-            child: ElevatedButton(
-              onPressed: () {
-                widget.onReset();
-                Navigator.pop(context);
-              },
-              child: Text("Réinitialiser", style: TextStyle(color: Colors.red)),
-            ),
-          ),
+          (widget.onReset != null)
+              ? SizedBox(
+                  width: 200,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      widget.onReset!();
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      "Réinitialiser",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                )
+              : SizedBox.shrink(),
         ],
       ),
     );

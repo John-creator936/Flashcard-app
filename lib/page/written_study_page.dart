@@ -1,4 +1,6 @@
+import 'package:flashcard_app/database/card_repository.dart';
 import 'package:flashcard_app/model/card.dart';
+import 'package:flashcard_app/model/sm2.dart';
 import 'package:flashcard_app/model/study_session.dart';
 import 'package:flashcard_app/widget/study_end_view.dart';
 import 'package:flashcard_app/widget/study_options.dart';
@@ -9,10 +11,12 @@ import 'package:flutter/material.dart';
 class WrittenStudyPage extends StatefulWidget {
   final List<Flashcard> flashcards;
   final int deckId;
+  final bool isReview;
   const WrittenStudyPage({
     super.key,
     required this.flashcards,
     required this.deckId,
+    this.isReview = false,
   });
 
   @override
@@ -28,7 +32,9 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
   bool? isCorrect;
   bool isFinished = false;
   static const _mode = 'written';
+  static const _weight = 1.0;
   bool isLoading = true;
+  bool isRetryRound = false;
 
   @override
   void initState() {
@@ -54,6 +60,14 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
   }
 
   void _nextCard() {
+    if (widget.isReview && !isRetryRound) {
+      Flashcard updatedCard = SM2.review(
+        studyCards[currentCardIndex],
+        isSuccess: isCorrect!,
+        weight: _weight,
+      );
+      CardRepository().update(updatedCard);
+    }
     setState(() {
       if (isCorrect == false) {
         failedCards.add(studyCards[currentCardIndex]);
@@ -66,19 +80,21 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
         isFinished = true;
       }
     });
-    if (!isFinished) {
-      _saveSession();
-    } else if (failedCards.isEmpty) {
-      StudySession.clear(widget.deckId, _mode);
-    } else {
-      StudySession(
-        studyCardIds: failedCards.map((flashcard) => flashcard.id!).toList(),
-        currentCardIndex: 0,
-        failedCardIds: [],
-        deckCardIds: widget.flashcards
-            .map((flashcard) => flashcard.id!)
-            .toList(),
-      ).save(widget.deckId, _mode);
+    if ((!widget.isReview)) {
+      if (!isFinished) {
+        _saveSession();
+      } else if (failedCards.isEmpty) {
+        StudySession.clear(widget.deckId, _mode);
+      } else {
+        StudySession(
+          studyCardIds: failedCards.map((flashcard) => flashcard.id!).toList(),
+          currentCardIndex: 0,
+          failedCardIds: [],
+          deckCardIds: widget.flashcards
+              .map((flashcard) => flashcard.id!)
+              .toList(),
+        ).save(widget.deckId, _mode);
+      }
     }
   }
 
@@ -114,8 +130,9 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
     _saveSession();
   }
 
-  void _startRound(List<Flashcard> cards) {
+  void _startRound(List<Flashcard> cards, {required bool isRetry}) {
     setState(() {
+      isRetryRound = isRetry;
       studyCards = cards.toList();
       failedCards = [];
       currentCardIndex = 0;
@@ -131,7 +148,9 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
 
   Future<void> _loadOptions() async {
     final loadedOptions = await StudyOptions.load(widget.deckId);
-    final session = await StudySession.load(widget.deckId, _mode);
+    final session = widget.isReview
+        ? null
+        : await StudySession.load(widget.deckId, _mode);
     final isValid =
         session != null &&
         setEquals(
@@ -164,6 +183,7 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
   }
 
   void _saveSession() {
+    if (widget.isReview) return;
     StudySession(
       studyCardIds: studyCards.map((flashcard) => flashcard.id!).toList(),
       currentCardIndex: currentCardIndex,
@@ -172,8 +192,8 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
     ).save(widget.deckId, _mode);
   }
 
-  void _retryFailedCards() => _startRound(failedCards);
-  void _resetSession() => _startRound(widget.flashcards);
+  void _retryFailedCards() => _startRound(failedCards, isRetry: true);
+  void _resetSession() => _startRound(widget.flashcards, isRetry: false);
 
   String get questionText => options.reversed
       ? studyCards[currentCardIndex].definition
@@ -191,7 +211,7 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
         correctCount: studyCards.length - failedCards.length,
         totalCount: studyCards.length,
         onRetryFailed: failedCards.isEmpty ? null : _retryFailedCards,
-        onReset: _resetSession,
+        onReset: widget.isReview ? null : _resetSession,
       );
     }
     return Center(
@@ -249,7 +269,7 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
                       builder: (context) => StudyOptionsSheet(
                         initialOptions: options,
                         onChanged: _onOptionsChanged,
-                        onReset: _resetSession,
+                        onReset: widget.isReview ? null : _resetSession,
                       ),
                     );
                   }

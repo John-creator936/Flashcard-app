@@ -4,14 +4,14 @@ class StudyEndView extends StatelessWidget {
   final int correctCount;
   final int totalCount;
   final VoidCallback? onRetryFailed;
-  final VoidCallback onReset;
+  final VoidCallback? onReset;
 
   const StudyEndView({
     super.key,
     required this.correctCount,
     required this.totalCount,
     this.onRetryFailed,
-    required this.onReset,
+    this.onReset,
   });
 
   @override
@@ -31,13 +31,18 @@ class StudyEndView extends StatelessWidget {
                     child: Text("Revoir les cartes ratées"),
                   ),
                 ),
-          SizedBox(
-            width: 250,
-            child: ElevatedButton(
-              onPressed: onReset,
-              child: Text("Réinitialiser", style: TextStyle(color: Colors.red)),
-            ),
-          ),
+          (onReset != null)
+              ? SizedBox(
+                  width: 250,
+                  child: ElevatedButton(
+                    onPressed: onReset,
+                    child: Text(
+                      "Réinitialiser",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                )
+              : SizedBox.shrink(),
         ],
       ),
     );
