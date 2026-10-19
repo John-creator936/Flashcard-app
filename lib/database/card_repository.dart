@@ -1,4 +1,5 @@
 import 'package:flashcard_app/model/deck_card.dart';
+import 'package:sqflite/sqflite.dart';
 import '../model/card.dart';
 import 'app_database.dart';
 
@@ -33,7 +34,12 @@ class CardRepository {
     final orderBy = '$tableDecksCard.${DeckCardFields.time} ASC';
 
     final result = await db.rawQuery(
-      'SELECT $tableCards.* FROM $tableCards JOIN $tableDecksCard ON $tableCards.${CardFields.id} = $tableDecksCard.${DeckCardFields.cardId} WHERE $tableDecksCard.${DeckCardFields.deckId} = ? ORDER BY $orderBy',
+      '''
+    SELECT $tableCards.* FROM $tableCards
+    JOIN $tableDecksCard ON $tableCards.${CardFields.id} = $tableDecksCard.${DeckCardFields.cardId}
+    WHERE $tableDecksCard.${DeckCardFields.deckId} = ? 
+    ORDER BY $orderBy
+    ''',
       [deckId],
     );
 
@@ -59,5 +65,19 @@ class CardRepository {
       where: '${CardFields.id} = ?',
       whereArgs: [id],
     );
+  }
+
+  Future<int> countReviewedToday(int deckId, DateTime now) async {
+    final db = await AppDatabase.instance.database;
+    final startOfDay = DateTime(now.year, now.month, now.day).toIso8601String();
+    final result = await db.rawQuery(
+      '''
+    SELECT COUNT(*) FROM $tableCards
+    JOIN $tableDecksCard ON $tableCards.${CardFields.id} = $tableDecksCard.${DeckCardFields.cardId}
+    WHERE $tableDecksCard.${DeckCardFields.deckId} = ? AND $tableCards.${CardFields.lastReviewedTime} >= ?
+    ''',
+      [deckId, startOfDay],
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
   }
 }
