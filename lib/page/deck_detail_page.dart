@@ -120,9 +120,9 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
                                   },
                                 ),
                                 ListTile(
-                                  enabled: reviewCards.length > 1,
+                                  enabled: cards.length > 1,
                                   title: Text("Mode QCM"),
-                                  subtitle: reviewCards.length > 1
+                                  subtitle: cards.length > 1
                                       ? null
                                       : Text("Il faut au moins 2 cartes"),
                                   onTap: () async {
@@ -133,6 +133,7 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
                                         builder: (context) =>
                                             MultipleChoiceStudyPage(
                                               flashcards: reviewCards,
+                                              allCards: cards,
                                               deckId: currentDeck.id!,
                                               isReview: true,
                                             ),

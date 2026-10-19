@@ -10,11 +10,13 @@ import 'package:flutter/material.dart';
 
 class MultipleChoiceStudyPage extends StatefulWidget {
   final List<Flashcard> flashcards;
+  final List<Flashcard>? allCards;
   final int deckId;
   final bool isReview;
   const MultipleChoiceStudyPage({
     super.key,
     required this.flashcards,
+    this.allCards,
     required this.deckId,
     this.isReview = false,
   });
@@ -36,6 +38,8 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
   static const _mode = 'mcq';
   bool isLoading = true;
   bool isRetryRound = false;
+
+  List<Flashcard> get _choicePool => widget.allCards ?? widget.flashcards;
 
   @override
   void initState() {
@@ -103,7 +107,7 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
   void _resetSession() => _startRound(widget.flashcards, isRetry: false);
 
   List<String> _buildChoices() {
-    List<String> allAnswers = widget.flashcards
+    List<String> allAnswers = _choicePool
         .map((flashcard) => _answerOf(flashcard))
         .toList();
     List<String> differentAnswers = allAnswers
