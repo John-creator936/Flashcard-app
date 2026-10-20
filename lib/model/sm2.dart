@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flashcard_app/model/app_clock.dart';
 import 'package:flashcard_app/model/card.dart';
 
 class SM2 {
@@ -23,7 +24,7 @@ class SM2 {
         easeFactor: newEaseFactor,
         points: 0,
         intervalDays: 1,
-        lastReviewedTime: DateTime.now(),
+        lastReviewedTime: AppClock.now(),
       );
     }
 
@@ -41,7 +42,7 @@ class SM2 {
       easeFactor: newEaseFactor,
       points: newPoints,
       intervalDays: newInterval,
-      lastReviewedTime: DateTime.now(),
+      lastReviewedTime: AppClock.now(),
     );
   }
 }

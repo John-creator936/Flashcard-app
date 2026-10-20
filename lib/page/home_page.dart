@@ -1,3 +1,4 @@
+import 'package:flashcard_app/model/app_clock.dart';
 import 'package:flashcard_app/model/deck_review_info.dart';
 import 'package:flashcard_app/page/create_deck_page.dart';
 import 'package:flashcard_app/widget/deck_search_view.dart';
@@ -28,7 +29,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadDecks() async {
     final decks = await DeckRepository().readAllDecks();
-    final now = DateTime.now();
+    final now = AppClock.now();
     Map<int, DeckReviewInfo> infos = {};
     for (final deck in decks) {
       infos[deck.id!] = await DeckReviewInfo.load(deck.id!, now);

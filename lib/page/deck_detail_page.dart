@@ -1,4 +1,5 @@
 import 'package:flashcard_app/database/deck_repository.dart';
+import 'package:flashcard_app/model/app_clock.dart';
 import 'package:flashcard_app/model/card.dart';
 import 'package:flashcard_app/model/deck.dart';
 import 'package:flashcard_app/model/deck_review_info.dart';
@@ -36,7 +37,7 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
   Future<void> _loadCards() async {
     final loadedInfo = await DeckReviewInfo.load(
       widget.deck.id!,
-      DateTime.now(),
+      AppClock.now(),
     );
     if (!mounted) return;
     setState(() {
