@@ -109,4 +109,25 @@ class SpellingErrors {
     ).where((variant) => !variant.contains('phf') && !variant.contains('fph')),
     ..._replaceEachOccurrence(word, 'ph', 'f'),
   ]);
+
+  static String? deleteLetter(String word) {
+    final List<String> possibleErrors = [];
+    for (int i = 1; i <= word.length - 1; i++) {
+      possibleErrors.add(word.substring(0, i) + word.substring(i + 1));
+    }
+    return _pickRandom(possibleErrors);
+  }
+
+  static String? swapAdjacentLetters(String word) {
+    final List<String> possibleErrors = [];
+    for (int i = 0; i <= word.length - 2; i++) {
+      if (word[i] != word[i + 1] &&
+          (i > 0 || word[i] != word[i].toUpperCase())) {
+        possibleErrors.add(
+          word.substring(0, i) + word[i + 1] + word[i] + word.substring(i + 2),
+        );
+      }
+    }
+    return _pickRandom(possibleErrors);
+  }
 }

@@ -121,4 +121,45 @@ void main() {
       expect(SpellingErrors.togglePhF('Haus'), isNull);
     });
   });
+  group('deleteLetter', () {
+    test('ne supprime jamais la première lettre', () {
+      expect(SpellingErrors.deleteLetter('Haus'), isIn(['Hus', 'Has', 'Hau']));
+    });
+    test('mot de deux lettres', () {
+      expect(SpellingErrors.deleteLetter('ja'), 'j');
+    });
+    test('une seule lettre → null', () {
+      expect(SpellingErrors.deleteLetter('a'), isNull);
+    });
+    test('mot vide → null', () {
+      expect(SpellingErrors.deleteLetter(''), isNull);
+    });
+  });
+
+  group('swapAdjacentLetters', () {
+    test('inversions possibles', () {
+      expect(
+        SpellingErrors.swapAdjacentLetters('Haus'),
+        isIn(['Huas', 'Hasu']),
+      );
+    });
+    test('position 0 autorisée si minuscule', () {
+      expect(SpellingErrors.swapAdjacentLetters('ja'), 'aj');
+    });
+    test('position 0 exclue si majuscule → null', () {
+      expect(SpellingErrors.swapAdjacentLetters('Ja'), isNull);
+    });
+    test('lettres identiques ignorées', () {
+      expect(SpellingErrors.swapAdjacentLetters('Otto'), 'Otot');
+    });
+    test('mot vide → null', () {
+      expect(SpellingErrors.swapAdjacentLetters(''), isNull);
+    });
+    test('majuscules au milieu autorisées', () {
+      expect(
+        SpellingErrors.swapAdjacentLetters('HaUS'),
+        isIn(['HUaS', 'HaSU']),
+      );
+    });
+  });
 }
