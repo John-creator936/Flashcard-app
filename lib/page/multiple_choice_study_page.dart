@@ -3,7 +3,7 @@ import 'package:flashcard_app/model/card.dart';
 import 'package:flashcard_app/model/sm2.dart';
 import 'package:flashcard_app/model/study_session.dart';
 import 'package:flashcard_app/widget/study_end_view.dart';
-import 'package:flashcard_app/widget/study_options.dart';
+import 'package:flashcard_app/model/study_options.dart';
 import 'package:flashcard_app/widget/study_options_sheet.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

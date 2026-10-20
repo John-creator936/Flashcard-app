@@ -1,4 +1,4 @@
-import 'package:flashcard_app/widget/study_options.dart';
+import 'package:flashcard_app/model/study_options.dart';
 import 'package:flutter/material.dart';
 
 class StudyOptionsSheet extends StatefulWidget {
