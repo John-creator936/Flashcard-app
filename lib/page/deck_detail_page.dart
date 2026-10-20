@@ -7,6 +7,7 @@ import 'package:flashcard_app/page/create_deck_page.dart';
 import 'package:flashcard_app/page/flashcard_study_page.dart';
 import 'package:flashcard_app/page/multiple_choice_study_page.dart';
 import 'package:flashcard_app/page/written_study_page.dart';
+import 'package:flashcard_app/widget/review_mode_sheet.dart';
 import 'package:flutter/material.dart';
 
 class DeckDetailPage extends StatefulWidget {
@@ -23,6 +24,7 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
   int dailyLimit = ReviewLimit.defaultLimit;
   int remainingToday = 0;
   List<Flashcard> reviewCards = [];
+  DeckReviewInfo? info;
 
   @override
   void initState() {
@@ -32,13 +34,17 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
   }
 
   Future<void> _loadCards() async {
-    final info = await DeckReviewInfo.load(widget.deck.id!, DateTime.now());
+    final loadedInfo = await DeckReviewInfo.load(
+      widget.deck.id!,
+      DateTime.now(),
+    );
     if (!mounted) return;
     setState(() {
-      cards = info.cards;
-      dailyLimit = info.dailyLimit;
-      remainingToday = info.remainingToday;
-      reviewCards = info.reviewCards;
+      cards = loadedInfo.cards;
+      dailyLimit = loadedInfo.dailyLimit;
+      remainingToday = loadedInfo.remainingToday;
+      reviewCards = loadedInfo.reviewCards;
+      info = loadedInfo;
     });
   }
 
@@ -135,80 +141,12 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
                   ),
                   ElevatedButton(
                     onPressed: (reviewCards.isNotEmpty)
-                        ? () {
-                            showModalBottomSheet(
-                              context: context,
-                              builder: (context) => Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 20.0,
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    ListTile(
-                                      title: Text("Mode flashcard"),
-                                      onTap: () async {
-                                        Navigator.pop(context);
-                                        await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                FlashcardStudyPage(
-                                                  flashcards: reviewCards,
-                                                  deckId: currentDeck.id!,
-                                                  isReview: true,
-                                                ),
-                                          ),
-                                        );
-                                        _loadCards();
-                                      },
-                                    ),
-                                    ListTile(
-                                      title: Text("Mode écrit"),
-                                      onTap: () async {
-                                        Navigator.pop(context);
-                                        await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                WrittenStudyPage(
-                                                  flashcards: reviewCards,
-                                                  deckId: currentDeck.id!,
-                                                  isReview: true,
-                                                ),
-                                          ),
-                                        );
-                                        _loadCards();
-                                      },
-                                    ),
-                                    ListTile(
-                                      enabled: cards.length > 1,
-                                      title: Text("Mode QCM"),
-                                      subtitle: cards.length > 1
-                                          ? null
-                                          : Text("Il faut au moins 2 cartes"),
-                                      onTap: () async {
-                                        Navigator.pop(context);
-                                        await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                MultipleChoiceStudyPage(
-                                                  flashcards: reviewCards,
-                                                  allCards: cards,
-                                                  deckId: currentDeck.id!,
-                                                  isReview: true,
-                                                ),
-                                          ),
-                                        );
-                                        _loadCards();
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }
+                        ? () => showReviewModeSheet(
+                            context,
+                            deckId: currentDeck.id!,
+                            info: info!,
+                            onFinished: _loadCards,
+                          )
                         : null,
                     child: Text("Réviser"),
                   ),
