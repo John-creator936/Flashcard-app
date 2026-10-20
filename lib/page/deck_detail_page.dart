@@ -1,15 +1,13 @@
-import 'package:flashcard_app/database/card_repository.dart';
 import 'package:flashcard_app/database/deck_repository.dart';
 import 'package:flashcard_app/model/card.dart';
 import 'package:flashcard_app/model/deck.dart';
+import 'package:flashcard_app/model/deck_review_info.dart';
 import 'package:flashcard_app/model/review_limit.dart';
-import 'package:flashcard_app/model/review_scheduler.dart';
 import 'package:flashcard_app/page/create_deck_page.dart';
 import 'package:flashcard_app/page/flashcard_study_page.dart';
 import 'package:flashcard_app/page/multiple_choice_study_page.dart';
 import 'package:flashcard_app/page/written_study_page.dart';
 import 'package:flutter/material.dart';
-import 'dart:math';
 
 class DeckDetailPage extends StatefulWidget {
   final Deck deck;
@@ -24,9 +22,7 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
   List<Flashcard> cards = [];
   int dailyLimit = ReviewLimit.defaultLimit;
   int remainingToday = 0;
-
-  List<Flashcard> get reviewCards =>
-      ReviewScheduler.cardsToReview(cards, DateTime.now(), remainingToday);
+  List<Flashcard> reviewCards = [];
 
   @override
   void initState() {
@@ -36,17 +32,13 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
   }
 
   Future<void> _loadCards() async {
-    final loadedCards = await CardRepository().readCardsByDeck(widget.deck.id!);
-    final loadedLimit = await ReviewLimit.load(widget.deck.id!);
-    final reviewedToday = await CardRepository().countReviewedToday(
-      widget.deck.id!,
-      DateTime.now(),
-    );
+    final info = await DeckReviewInfo.load(widget.deck.id!, DateTime.now());
     if (!mounted) return;
     setState(() {
-      cards = loadedCards;
-      dailyLimit = loadedLimit;
-      remainingToday = max(0, dailyLimit - reviewedToday);
+      cards = info.cards;
+      dailyLimit = info.dailyLimit;
+      remainingToday = info.remainingToday;
+      reviewCards = info.reviewCards;
     });
   }
 
