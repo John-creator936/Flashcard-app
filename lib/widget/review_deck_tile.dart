@@ -26,7 +26,10 @@ class ReviewDeckTile extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(deck.name, maxLines: 2, overflow: TextOverflow.ellipsis),
-                Text("$cardCount cartes", style: TextStyle(fontSize: 12)),
+                Text(
+                  "$cardCount ${(cardCount == 1) ? "carte" : "cartes"}",
+                  style: TextStyle(fontSize: 12),
+                ),
               ],
             ),
           ),

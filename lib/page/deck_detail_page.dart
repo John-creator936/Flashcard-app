@@ -21,11 +21,12 @@ class DeckDetailPage extends StatefulWidget {
 
 class _DeckDetailPageState extends State<DeckDetailPage> {
   late Deck currentDeck;
-  List<Flashcard> cards = [];
-  int dailyLimit = ReviewLimit.defaultLimit;
-  int remainingToday = 0;
-  List<Flashcard> reviewCards = [];
   DeckReviewInfo? info;
+
+  List<Flashcard> get cards => info?.cards ?? [];
+  int get dailyLimit => info?.dailyLimit ?? ReviewLimit.defaultLimit;
+  int get remainingToday => info?.remainingToday ?? 0;
+  List<Flashcard> get reviewCards => info?.reviewCards ?? [];
 
   @override
   void initState() {
@@ -41,10 +42,6 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
     );
     if (!mounted) return;
     setState(() {
-      cards = loadedInfo.cards;
-      dailyLimit = loadedInfo.dailyLimit;
-      remainingToday = loadedInfo.remainingToday;
-      reviewCards = loadedInfo.reviewCards;
       info = loadedInfo;
     });
   }
@@ -93,7 +90,7 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
 
   String _reviewTitle() {
     if (reviewCards.isNotEmpty) {
-      return "${reviewCards.length} cartes à réviser";
+      return "${reviewCards.length} ${(reviewCards.length == 1) ? "carte" : "cartes"} à réviser";
     }
     if (remainingToday == 0) {
       return "Limite du jour atteinte";
@@ -113,7 +110,7 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
                 context,
                 MaterialPageRoute(
                   builder: (context) =>
-                      CreateDeckPage(existingDeck: widget.deck),
+                      CreateDeckPage(existingDeck: currentDeck),
                 ),
               );
               _loadCards();
