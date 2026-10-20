@@ -62,4 +62,28 @@ void main() {
       expect(SpellingErrors.toggleDoubleConsonant(''), isNull);
     });
   });
+
+  group('changeAccent', () {
+    test('umlaut retiré', () {
+      expect(SpellingErrors.changeAccent('Mädchen'), 'Madchen');
+    });
+    test('cédille retirée', () {
+      expect(SpellingErrors.changeAccent('garçon'), 'garcon');
+    });
+    test('plusieurs accents, plusieurs possibilités', () {
+      expect(
+        SpellingErrors.changeAccent('élève'),
+        isIn(['elève', 'èlève', 'êlève', 'éleve', 'éléve']),
+      );
+    });
+    test('pas d\'accent → null', () {
+      expect(SpellingErrors.changeAccent('Haus'), isNull);
+    });
+    test('mot vide → null', () {
+      expect(SpellingErrors.changeAccent(''), isNull);
+    });
+    test('umlaut majuscule', () {
+      expect(SpellingErrors.changeAccent('Übung'), 'Ubung');
+    });
+  });
 }

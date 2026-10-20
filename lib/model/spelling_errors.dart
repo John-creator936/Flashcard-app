@@ -3,6 +3,16 @@ import 'dart:math';
 class SpellingErrors {
   static const _vowels = 'aeiouyàâäéèêëîïôöûüù';
   static const _neverDoubled = 'hjqwxy'; //TODO: Vérifier source
+  static const Map<String, List<String>> _accentConfusions = {
+    'é': ['e', 'è', 'ê'],
+    'è': ['e', 'é'],
+    'ê': ['e', 'è'],
+    'à': ['a'],
+    'ç': ['c'],
+    'ä': ['a'],
+    'ö': ['o'],
+    'ü': ['u'],
+  };
 
   static String? toggleFirstLetterCase(String word) {
     if (word.isEmpty) return null;
@@ -25,8 +35,13 @@ class SpellingErrors {
     return true;
   }
 
+  static String? _pickRandom(List<String> possibleErrors) {
+    if (possibleErrors.isEmpty) return null;
+    return possibleErrors[Random().nextInt(possibleErrors.length)];
+  }
+
   static String? toggleDoubleConsonant(String word) {
-    final possibleErrors = [];
+    final List<String> possibleErrors = [];
     for (int i = 0; i <= word.length - 2; i++) {
       final letter = word[i];
       if (_isDoublableConsonant(letter) && word[i + 1] == letter) {
@@ -41,7 +56,24 @@ class SpellingErrors {
         }
       }
     }
-    if (possibleErrors.isEmpty) return null;
-    return possibleErrors[Random().nextInt(possibleErrors.length)];
+    return _pickRandom(possibleErrors);
+  }
+
+  static String? changeAccent(String word) {
+    final List<String> possibleErrors = [];
+    for (int i = 0; i <= word.length - 1; i++) {
+      final letter = word[i];
+      final lowerLetter = letter.toLowerCase();
+      final isUpper = letter != lowerLetter;
+      if (_accentConfusions.containsKey(lowerLetter)) {
+        for (final confusion in _accentConfusions[lowerLetter]!) {
+          final replacement = isUpper ? confusion.toUpperCase() : confusion;
+          possibleErrors.add(
+            word.substring(0, i) + replacement + word.substring(i + 1),
+          );
+        }
+      }
+    }
+    return _pickRandom(possibleErrors);
   }
 }
