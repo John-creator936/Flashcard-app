@@ -1,3 +1,4 @@
+import 'package:flashcard_app/model/deck_review_info.dart';
 import 'package:flashcard_app/page/create_deck_page.dart';
 import 'package:flashcard_app/widget/deck_search_view.dart';
 import 'package:flashcard_app/widget/deck_tile.dart';
@@ -15,6 +16,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int currentPage = 0;
   List<Deck> allDecks = [];
+  Map<int, DeckReviewInfo> reviewInfos = {};
 
   @override
   void initState() {
@@ -24,10 +26,21 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadDecks() async {
     final decks = await DeckRepository().readAllDecks();
+    final now = DateTime.now();
+    Map<int, DeckReviewInfo> infos = {};
+    for (final deck in decks) {
+      infos[deck.id!] = await DeckReviewInfo.load(deck.id!, now);
+    }
+    if (!mounted) return;
     setState(() {
       allDecks = decks;
+      reviewInfos = infos;
     });
   }
+
+  List<Deck> get decksToReview => allDecks
+      .where((deck) => reviewInfos[deck.id]?.reviewCards.isNotEmpty ?? false)
+      .toList();
 
   @override
   Widget build(BuildContext context) {
