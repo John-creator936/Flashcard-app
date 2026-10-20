@@ -76,4 +76,37 @@ class SpellingErrors {
     }
     return _pickRandom(possibleErrors);
   }
+
+  static List<String> _replaceEachOccurrence(
+    String word,
+    String from,
+    String to,
+  ) {
+    final List<String> variants = [];
+    final lowerWord = word.toLowerCase();
+    int i = lowerWord.indexOf(from);
+    while (i != -1) {
+      final bool isUpper = word[i] != lowerWord[i];
+      final replacement = isUpper ? to[0].toUpperCase() + to.substring(1) : to;
+      variants.add(
+        word.substring(0, i) + replacement + word.substring(i + from.length),
+      );
+      i = lowerWord.indexOf(from, i + 1);
+    }
+    return variants;
+  }
+
+  static String? toggleIeEi(String word) => _pickRandom([
+    ..._replaceEachOccurrence(word, 'ie', 'ei'),
+    ..._replaceEachOccurrence(word, 'ei', 'ie'),
+  ]);
+
+  static String? togglePhF(String word) => _pickRandom([
+    ..._replaceEachOccurrence(
+      word,
+      'f',
+      'ph',
+    ).where((variant) => !variant.contains('phf') && !variant.contains('fph')),
+    ..._replaceEachOccurrence(word, 'ph', 'f'),
+  ]);
 }

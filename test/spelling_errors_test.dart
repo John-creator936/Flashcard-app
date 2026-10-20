@@ -86,4 +86,39 @@ void main() {
       expect(SpellingErrors.changeAccent('Übung'), 'Ubung');
     });
   });
+  group('toggleIeEi', () {
+    test('ie → ei', () {
+      expect(SpellingErrors.toggleIeEi('Brief'), 'Breif');
+    });
+    test('ei → ie', () {
+      expect(SpellingErrors.toggleIeEi('receive'), 'recieve');
+    });
+    test('ei et ie dans le même mot', () {
+      expect(SpellingErrors.toggleIeEi('Feier'), isIn(['Fieer', 'Feeir']));
+    });
+    test('ni ie ni ei → null', () {
+      expect(SpellingErrors.toggleIeEi('Haus'), isNull);
+    });
+  });
+
+  group('togglePhF', () {
+    test('ph → f, majuscule conservée', () {
+      expect(SpellingErrors.togglePhF('Physik'), 'Fysik');
+    });
+    test('ph → f, minuscule', () {
+      expect(SpellingErrors.togglePhF('photo'), 'foto');
+    });
+    test('f → ph', () {
+      expect(SpellingErrors.togglePhF('Hafen'), 'Haphen');
+    });
+    test('F majuscule → Ph', () {
+      expect(SpellingErrors.togglePhF('Fisch'), 'Phisch');
+    });
+    test('ff : variantes absurdes filtrées → null', () {
+      expect(SpellingErrors.togglePhF('Kartoffel'), isNull);
+    });
+    test('ni ph ni f → null', () {
+      expect(SpellingErrors.togglePhF('Haus'), isNull);
+    });
+  });
 }
