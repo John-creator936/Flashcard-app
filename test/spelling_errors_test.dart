@@ -162,4 +162,30 @@ void main() {
       );
     });
   });
+  group('generate', () {
+    test('mot court : principales puis secours', () {
+      expect(SpellingErrors.generate('ja').toSet(), {'Ja', 'j', 'aj'});
+    });
+    test('règles principales prioritaires', () {
+      final errors = SpellingErrors.generate('Haus');
+      expect(errors, hasLength(3));
+      expect(errors, containsAll(['haus', 'Hauss']));
+    });
+    test('jamais la bonne réponse, jamais de doublon', () {
+      for (final word in ['Kartoffeln', 'élève', 'Brief', 'Physik', 'ja']) {
+        final errors = SpellingErrors.generate(word);
+        expect(errors, isNot(contains(word)));
+        expect(errors.toSet(), hasLength(errors.length));
+      }
+    });
+    test('count respecté', () {
+      expect(SpellingErrors.generate('Kartoffeln', count: 1), hasLength(1));
+    });
+    test('une seule lettre : moins de 3 erreurs', () {
+      expect(SpellingErrors.generate('a'), ['A']);
+    });
+    test('mot vide : aucune erreur', () {
+      expect(SpellingErrors.generate(''), isEmpty);
+    });
+  });
 }

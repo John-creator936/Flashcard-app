@@ -1,5 +1,7 @@
 import 'dart:math';
 
+typedef SpellingRule = String? Function(String word);
+
 class SpellingErrors {
   static const _vowels = 'aeiouyàâäéèêëîïôöûüù';
   static const _neverDoubled = 'hjqwxy'; //TODO: Vérifier source
@@ -13,6 +15,7 @@ class SpellingErrors {
     'ö': ['o'],
     'ü': ['u'],
   };
+  static const _maxAttempts = 20;
 
   static String? toggleFirstLetterCase(String word) {
     if (word.isEmpty) return null;
@@ -129,5 +132,42 @@ class SpellingErrors {
       }
     }
     return _pickRandom(possibleErrors);
+  }
+
+  static const List<SpellingRule> _mainRules = [
+    toggleFirstLetterCase,
+    toggleDoubleConsonant,
+    changeAccent,
+    toggleIeEi,
+    togglePhF,
+  ];
+  static const List<SpellingRule> _backupRules = [
+    deleteLetter,
+    swapAdjacentLetters,
+  ];
+
+  static void _addErrors(
+    String answer,
+    List<SpellingRule> rules,
+    Set<String> errors,
+    int count,
+  ) {
+    final shuffledRules = [...rules]..shuffle();
+    int attempts = 0;
+    while (errors.length < count && attempts < _maxAttempts) {
+      final rule = shuffledRules[attempts % shuffledRules.length];
+      final error = rule(answer);
+      if (error != null && error != answer) {
+        errors.add(error);
+      }
+      attempts++;
+    }
+  }
+
+  static List<String> generate(String answer, {int count = 3}) {
+    final Set<String> errors = {};
+    _addErrors(answer, _mainRules, errors, count);
+    _addErrors(answer, _backupRules, errors, count);
+    return errors.toList();
   }
 }
