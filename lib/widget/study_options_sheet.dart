@@ -5,12 +5,14 @@ class StudyOptionsSheet extends StatefulWidget {
   final StudyOptions initialOptions;
   final ValueChanged<StudyOptions> onChanged;
   final VoidCallback? onReset;
+  final bool showSpellingTraps;
 
   const StudyOptionsSheet({
     super.key,
     required this.initialOptions,
     required this.onChanged,
     this.onReset,
+    this.showSpellingTraps = false,
   });
 
   @override
@@ -53,6 +55,20 @@ class _StudyOptionsSheetState extends State<StudyOptionsSheet> {
               widget.onChanged(options);
             },
           ),
+          if (widget.showSpellingTraps)
+            SwitchListTile(
+              title: Text("Pièges d'orthographe"),
+              subtitle: Text(
+                "Fausses réponses inventées au lieu d'autres cartes",
+              ),
+              value: options.spellingTraps,
+              onChanged: (value) {
+                setState(() {
+                  options = options.copy(spellingTraps: value);
+                });
+                widget.onChanged(options);
+              },
+            ),
           (widget.onReset != null)
               ? SizedBox(
                   width: 200,

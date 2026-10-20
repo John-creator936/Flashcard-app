@@ -1,6 +1,7 @@
 import 'package:flashcard_app/database/card_repository.dart';
 import 'package:flashcard_app/model/card.dart';
 import 'package:flashcard_app/model/sm2.dart';
+import 'package:flashcard_app/model/spelling_errors.dart';
 import 'package:flashcard_app/model/study_session.dart';
 import 'package:flashcard_app/widget/study_end_view.dart';
 import 'package:flashcard_app/model/study_options.dart';
@@ -107,6 +108,19 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
   void _resetSession() => _startRound(widget.flashcards, isRetry: false);
 
   List<String> _buildChoices() {
+    List<String> wrongAnswers = [];
+    if (options.spellingTraps) {
+      wrongAnswers = SpellingErrors.generate(expectedAnswer);
+    }
+    if (wrongAnswers.isEmpty) {
+      wrongAnswers = _otherCardAnswers();
+    }
+    List<String> allChoices = [...wrongAnswers, expectedAnswer];
+    allChoices.shuffle();
+    return allChoices;
+  }
+
+  List<String> _otherCardAnswers() {
     List<String> allAnswers = _choicePool
         .map((flashcard) => _answerOf(flashcard))
         .toList();
@@ -116,9 +130,7 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
     List<String> uniqueAnswers = differentAnswers.toSet().toList();
     uniqueAnswers.shuffle();
     List<String> wrongAnswers = uniqueAnswers.take(3).toList();
-    List<String> allChoices = [...wrongAnswers, expectedAnswer];
-    allChoices.shuffle();
-    return allChoices;
+    return wrongAnswers;
   }
 
   String _answerOf(Flashcard flashcard) =>
@@ -144,6 +156,8 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
     setState(() {
       bool shuffleChanged = options.shuffled != newOptions.shuffled;
       bool reversedChanged = options.reversed != newOptions.reversed;
+      bool spellingTrapsChanged =
+          options.spellingTraps != newOptions.spellingTraps;
       options = newOptions;
       options.save(widget.deckId);
       if (options.shuffled == true && shuffleChanged) {
@@ -162,7 +176,7 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
             .toList();
         studyCards = [...studiedCards, ...orderedRemainingCards];
       }
-      if (reversedChanged || shuffleChanged) {
+      if (reversedChanged || shuffleChanged || spellingTrapsChanged) {
         selectedChoice = null;
         choices = _buildChoices();
       }
@@ -296,6 +310,7 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
                         initialOptions: options,
                         onChanged: _onOptionsChanged,
                         onReset: (widget.isReview) ? null : _resetSession,
+                        showSpellingTraps: true,
                       ),
                     );
                   }
