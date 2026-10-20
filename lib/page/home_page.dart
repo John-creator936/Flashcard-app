@@ -2,6 +2,8 @@ import 'package:flashcard_app/model/deck_review_info.dart';
 import 'package:flashcard_app/page/create_deck_page.dart';
 import 'package:flashcard_app/widget/deck_search_view.dart';
 import 'package:flashcard_app/widget/deck_tile.dart';
+import 'package:flashcard_app/widget/review_deck_tile.dart';
+import 'package:flashcard_app/widget/review_mode_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_app/model/deck.dart';
 import 'package:flashcard_app/database/deck_repository.dart';
@@ -49,6 +51,40 @@ class _HomePageState extends State<HomePage> {
           ? DeckSearchView(allDecks: allDecks)
           : Column(
               children: [
+                SizedBox(height: 60),
+                Text(
+                  "Révisions du jour",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 10),
+                if (decksToReview.isEmpty)
+                  Text("Tout est à jour !")
+                else
+                  SizedBox(
+                    height: 120,
+                    child: ListView.separated(
+                      itemCount: decksToReview.length,
+                      scrollDirection: Axis.horizontal,
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      itemBuilder: (context, index) {
+                        final deck = decksToReview[index];
+                        final info = reviewInfos[deck.id]!;
+                        return ReviewDeckTile(
+                          deck: deck,
+                          cardCount: info.reviewCards.length,
+                          onTap: () => showReviewModeSheet(
+                            context,
+                            deckId: deck.id!,
+                            info: info,
+                            onFinished: _loadDecks,
+                          ),
+                        );
+                      },
+                      separatorBuilder: (context, index) {
+                        return const SizedBox(width: 10);
+                      },
+                    ),
+                  ),
                 SizedBox(height: 60),
                 Text(
                   "Unités récentes",
