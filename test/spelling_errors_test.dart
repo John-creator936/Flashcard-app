@@ -250,4 +250,75 @@ void main() {
       expect(SpellingErrors.toggleVF('Haus'), isNull);
     });
   });
+  group('dropSilentLetter', () {
+    test('t final', () {
+      expect(SpellingErrors.dropSilentLetter('chat'), 'cha');
+    });
+    test('d final', () {
+      expect(SpellingErrors.dropSilentLetter('grand'), 'gran');
+    });
+    test('h initial, majuscule transférée', () {
+      expect(SpellingErrors.dropSilentLetter('Homme'), 'Omme');
+    });
+    test('h initial et x final', () {
+      expect(
+        SpellingErrors.dropSilentLetter('heureux'),
+        isIn(['eureux', 'heureu']),
+      );
+    });
+    test('rien à retirer → null', () {
+      expect(SpellingErrors.dropSilentLetter('ami'), isNull);
+    });
+  });
+
+  group('toggleFrenchEnding', () {
+    test('er → é ou ez', () {
+      expect(
+        SpellingErrors.toggleFrenchEnding('manger'),
+        isIn(['mangé', 'mangez']),
+      );
+    });
+    test('é → er ou ez', () {
+      expect(
+        SpellingErrors.toggleFrenchEnding('café'),
+        isIn(['cafer', 'cafez']),
+      );
+    });
+    test('ez → é ou er', () {
+      expect(SpellingErrors.toggleFrenchEnding('nez'), isIn(['né', 'ner']));
+    });
+    test('autre fin → null', () {
+      expect(SpellingErrors.toggleFrenchEnding('maison'), isNull);
+    });
+  });
+
+  group('toggleEntAnt', () {
+    test('ent → ant', () {
+      expect(SpellingErrors.toggleEntAnt('différent'), 'différant');
+    });
+    test('ant → ent', () {
+      expect(SpellingErrors.toggleEntAnt('élégant'), 'élégent');
+    });
+    test('anglais aussi', () {
+      expect(SpellingErrors.toggleEntAnt('independent'), 'independant');
+    });
+    test('autre fin → null', () {
+      expect(SpellingErrors.toggleEntAnt('maison'), isNull);
+    });
+  });
+
+  group('toggleEauAuO', () {
+    test('eau → au ou o', () {
+      expect(SpellingErrors.toggleEauAuO('bateau'), isIn(['batau', 'bato']));
+    });
+    test('au → o ou eau', () {
+      expect(SpellingErrors.toggleEauAuO('chaud'), isIn(['chod', 'cheaud']));
+    });
+    test('ni eau ni au → null', () {
+      expect(SpellingErrors.toggleEauAuO('maison'), isNull);
+    });
+    test('au initial : pas de eau', () {
+      expect(SpellingErrors.toggleEauAuO('auto'), 'oto');
+    });
+  });
 }

@@ -187,6 +187,51 @@ class SpellingErrors {
     ),
   ]);
 
+  static String? dropSilentLetter(String word) => _pickRandom(
+    [
+      _replaceAtEnd(word, 't', ''),
+      _replaceAtEnd(word, 'd', ''),
+      _replaceAtEnd(word, 's', ''),
+      _replaceAtEnd(word, 'x', ''),
+      _replaceAtEnd(word, 'p', ''),
+      _replaceAtStart(word, 'h', ''),
+    ].whereType<String>().toList(),
+  );
+
+  static String? toggleFrenchEnding(String word) => _pickRandom(
+    [
+      _replaceAtEnd(word, 'é', 'er'),
+      _replaceAtEnd(word, 'é', 'ez'),
+      _replaceAtEnd(word, 'er', 'é'),
+      _replaceAtEnd(word, 'er', 'ez'),
+      _replaceAtEnd(word, 'ez', 'é'),
+      _replaceAtEnd(word, 'ez', 'er'),
+    ].whereType<String>().toList(),
+  );
+
+  static String? toggleEntAnt(String word) => _pickRandom(
+    [
+      _replaceAtEnd(word, 'ent', 'ant'),
+      _replaceAtEnd(word, 'ant', 'ent'),
+    ].whereType<String>().toList(),
+  );
+
+  static String? toggleEauAuO(String word) => _pickRandom(
+    (word.toLowerCase().contains('eau'))
+        ? [
+            ..._replaceEachOccurrence(word, 'eau', 'au'),
+            ..._replaceEachOccurrence(word, 'eau', 'o'),
+          ]
+        : [
+            ..._replaceEachOccurrence(word, 'au', 'o'),
+            ..._replaceEachOccurrence(
+              word,
+              'au',
+              'eau',
+            ).where((variant) => !variant.toLowerCase().startsWith('eau')),
+          ],
+  );
+
   static const List<SpellingRule> _mainRules = [
     toggleFirstLetterCase,
     toggleDoubleConsonant,
