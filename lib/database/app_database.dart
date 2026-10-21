@@ -24,7 +24,7 @@ class AppDatabase {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _createDB,
       onConfigure: _onConfigure,
       onUpgrade: _upgradeDB,
@@ -50,7 +50,10 @@ class AppDatabase {
 CREATE TABLE $tableDecks ( 
   ${DeckFields.id} $idType, 
   ${DeckFields.name} $textType,
-  ${DeckFields.time} $textType
+  ${DeckFields.time} $textType,
+  ${DeckFields.deckType} $textType DEFAULT 'other', 
+  ${DeckFields.termLanguage} TEXT,
+  ${DeckFields.definitionLanguage} TEXT
   )
 ''');
 
@@ -88,6 +91,7 @@ CREATE TABLE $tableDecksCard (
   /// Chaque bloc `if (oldVersion < N)` correspond à une version.
   /// Les anciens blocs ne doivent jamais être modifiés.
   /// Version 2 : colonnes de la Révision (SM-2) dans `cards`.
+  /// Version 3 : type et langues du deck dans `decks`.
   Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       await db.execute(
@@ -101,6 +105,17 @@ CREATE TABLE $tableDecksCard (
       );
       await db.execute(
         'ALTER TABLE $tableCards ADD COLUMN ${CardFields.lastReviewedTime} TEXT',
+      );
+    }
+    if (oldVersion < 3) {
+      await db.execute(
+        "ALTER TABLE $tableDecks ADD COLUMN ${DeckFields.deckType} TEXT NOT NULL DEFAULT 'other'",
+      );
+      await db.execute(
+        "ALTER TABLE $tableDecks ADD COLUMN ${DeckFields.termLanguage} TEXT",
+      );
+      await db.execute(
+        "ALTER TABLE $tableDecks ADD COLUMN ${DeckFields.definitionLanguage} TEXT",
       );
     }
   }
