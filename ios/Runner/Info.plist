@@ -26,6 +26,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Pour photographier une liste de vocabulaire.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Pour créer des cartes à partir d'une photo de ta liste de vocabulaire.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -66,9 +70,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSCameraUsageDescription</key>
-	<string>Pour photographier une liste de vocabulaire.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Pour créer des cartes à partir d'une photo de ta liste de vocabulaire.</string>
 </dict>
 </plist>
