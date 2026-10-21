@@ -111,7 +111,10 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
   List<String> _buildChoices() {
     List<String> wrongAnswers = [];
     if (options.spellingTraps && _trapsAllowed) {
-      wrongAnswers = SpellingErrors.generate(expectedAnswer);
+      wrongAnswers = SpellingErrors.generate(
+        expectedAnswer,
+        language: answerLanguage,
+      );
     }
     if (wrongAnswers.isEmpty) {
       wrongAnswers = _otherCardAnswers();

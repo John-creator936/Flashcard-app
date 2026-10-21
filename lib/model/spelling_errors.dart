@@ -134,11 +134,18 @@ class SpellingErrors {
     return _pickRandom(possibleErrors);
   }
 
-  static String? _replaceAtEnd(String word, String from, String to) {
-    final lowerWord = word.toLowerCase();
-    if (lowerWord.endsWith(from)) {
-      int i = word.length - from.length;
-      return word.substring(0, i) + to;
+  static String? _replaceAtEnd(
+    String word,
+    String from,
+    String to, {
+    int minPrefix = 0,
+  }) {
+    if (word.length - from.length >= minPrefix) {
+      final lowerWord = word.toLowerCase();
+      if (lowerWord.endsWith(from)) {
+        int i = word.length - from.length;
+        return word.substring(0, i) + to;
+      }
     }
     return null;
   }
@@ -211,8 +218,8 @@ class SpellingErrors {
 
   static String? toggleEntAnt(String word) => _pickRandom(
     [
-      _replaceAtEnd(word, 'ent', 'ant'),
-      _replaceAtEnd(word, 'ant', 'ent'),
+      _replaceAtEnd(word, 'ent', 'ant', minPrefix: 3),
+      _replaceAtEnd(word, 'ant', 'ent', minPrefix: 3),
     ].whereType<String>().toList(),
   );
 
@@ -232,6 +239,22 @@ class SpellingErrors {
           ],
   );
 
+  static String? dropEnglishSilentLetter(String word) => _pickRandom(
+    [
+      _replaceAtEnd(word, 'mb', 'm'),
+      _replaceAtStart(word, 'kn', 'n'),
+      _replaceAtStart(word, 'wr', 'r'),
+      _replaceAtStart(word, 'wh', 'w'),
+    ].whereType<String>().toList(),
+  );
+
+  static String? toggleAbleIble(String word) => _pickRandom(
+    [
+      _replaceAtEnd(word, 'able', 'ible', minPrefix: 3),
+      _replaceAtEnd(word, 'ible', 'able', minPrefix: 3),
+    ].whereType<String>().toList(),
+  );
+
   static const List<SpellingRule> _mainRules = [
     toggleFirstLetterCase,
     toggleDoubleConsonant,
@@ -243,6 +266,11 @@ class SpellingErrors {
     deleteLetter,
     swapAdjacentLetters,
   ];
+  static const Map<String, List<SpellingRule>> _languageRules = {
+    'de': [addUmlaut, devoiceFinalConsonant, simplifyTzCk, toggleVF],
+    'fr': [dropSilentLetter, toggleFrenchEnding, toggleEntAnt, toggleEauAuO],
+    'en': [dropEnglishSilentLetter, toggleAbleIble, toggleEntAnt],
+  };
 
   static void _addErrors(
     String answer,
@@ -262,9 +290,14 @@ class SpellingErrors {
     }
   }
 
-  static List<String> generate(String answer, {int count = 3}) {
+  static List<String> generate(
+    String answer, {
+    String? language,
+    int count = 3,
+  }) {
     final Set<String> errors = {};
-    _addErrors(answer, _mainRules, errors, count);
+    final mainRules = [..._mainRules, ...?_languageRules[language]];
+    _addErrors(answer, mainRules, errors, count);
     _addErrors(answer, _backupRules, errors, count);
     return errors.toList();
   }

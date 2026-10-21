@@ -187,6 +187,16 @@ void main() {
     test('mot vide : aucune erreur', () {
       expect(SpellingErrors.generate(''), isEmpty);
     });
+    test('règles allemandes ajoutées', () {
+      expect(SpellingErrors.generate('Hund', language: 'de').toSet(), {
+        'hund',
+        'Hünd',
+        'Hunt',
+      });
+    });
+    test('sans langue : pas de règle allemande', () {
+      expect(SpellingErrors.generate('Hund'), isNot(contains('Hunt')));
+    });
   });
   group('addUmlaut', () {
     test('u → ü', () {
@@ -319,6 +329,44 @@ void main() {
     });
     test('au initial : pas de eau', () {
       expect(SpellingErrors.toggleEauAuO('auto'), 'oto');
+    });
+  });
+  group('dropEnglishSilentLetter', () {
+    test('kn- → n', () {
+      expect(SpellingErrors.dropEnglishSilentLetter('knife'), 'nife');
+    });
+    test('Wr- → R, majuscule conservée', () {
+      expect(SpellingErrors.dropEnglishSilentLetter('Write'), 'Rite');
+    });
+    test('wh- → w', () {
+      expect(SpellingErrors.dropEnglishSilentLetter('whale'), 'wale');
+    });
+    test('-mb → m', () {
+      expect(SpellingErrors.dropEnglishSilentLetter('lamb'), 'lam');
+    });
+    test('aucun motif → null', () {
+      expect(SpellingErrors.dropEnglishSilentLetter('table'), isNull);
+    });
+  });
+
+  group('toggleAbleIble', () {
+    test('ible → able', () {
+      expect(SpellingErrors.toggleAbleIble('possible'), 'possable');
+    });
+    test('able → ible', () {
+      expect(SpellingErrors.toggleAbleIble('acceptable'), 'acceptible');
+    });
+    test('mot trop court → null', () {
+      expect(SpellingErrors.toggleAbleIble('table'), isNull);
+    });
+  });
+
+  group('minPrefix', () {
+    test('dent : préfixe trop court → null', () {
+      expect(SpellingErrors.toggleEntAnt('dent'), isNull);
+    });
+    test('want : préfixe trop court → null', () {
+      expect(SpellingErrors.toggleEntAnt('want'), isNull);
     });
   });
 }
