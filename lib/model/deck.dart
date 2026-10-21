@@ -1,4 +1,9 @@
 final String tableDecks = 'decks';
+const Map<String, String> deckLanguages = {
+  'fr': 'Français',
+  'de': 'Allemand',
+  'en': 'Anglais',
+};
 
 class DeckFields {
   static final List<String> values = [

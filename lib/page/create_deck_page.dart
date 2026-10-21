@@ -6,6 +6,7 @@ import 'package:flashcard_app/model/deck.dart';
 import 'package:flashcard_app/model/deck_card.dart';
 import 'package:flashcard_app/page/card_picker_page.dart';
 import 'package:flashcard_app/page/deck_picker_page.dart';
+import 'package:flashcard_app/widget/deck_settings_sheet.dart';
 import 'package:flashcard_app/widget/editable_existing_card.dart';
 import 'package:flashcard_app/widget/flashcard_input.dart';
 import 'package:flutter/material.dart';
@@ -23,10 +24,16 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
   final List<TextEditingController> termControllers = [];
   final List<TextEditingController> definitionControllers = [];
   final List<EditableExistingCard> selectedExistingCards = [];
+  late String deckType;
+  String? termLanguage;
+  String? definitionLanguage;
 
   @override
   void initState() {
     super.initState();
+    deckType = widget.existingDeck?.deckType ?? 'translation';
+    termLanguage = widget.existingDeck?.termLanguage;
+    definitionLanguage = widget.existingDeck?.definitionLanguage;
     if (widget.existingDeck != null) {
       titleController.text = widget.existingDeck!.name;
       _loadExistingDeckCards();
@@ -75,6 +82,7 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
   ///
   /// Si `widget.existingDeck` est fourni, le deck est mis à jour (nouveau titre,
   /// date de création conservée) ; sinon, un nouveau deck est créé.
+  /// mis à jour (nouveau titre, type et langues, date de création conservée)
   Future<void> _saveDeck() async {
     final DateTime createdTime = DateTime.now();
     final deckRepository = DeckRepository();
@@ -83,6 +91,9 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
       final Deck deck = Deck(
         name: titleController.text,
         createdTime: createdTime,
+        deckType: deckType,
+        termLanguage: termLanguage,
+        definitionLanguage: definitionLanguage,
       );
       savedDeck = await deckRepository.create(deck);
     } else {
@@ -90,6 +101,9 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
         id: widget.existingDeck!.id,
         name: titleController.text,
         createdTime: widget.existingDeck!.createdTime,
+        deckType: deckType,
+        termLanguage: termLanguage,
+        definitionLanguage: definitionLanguage,
       );
       await deckRepository.update(deck);
       savedDeck = deck;
@@ -137,9 +151,29 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
     return Scaffold(
       appBar: AppBar(
         title: (widget.existingDeck == null)
-            ? Text("Création d'unité")
-            : Text("Modification d'unité"),
+            ? Text("Création")
+            : Text("Modification"),
         actions: [
+          IconButton(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (context) => DeckSettingsSheet(
+                  initialDeckType: deckType,
+                  initialTermLanguage: termLanguage,
+                  initialDefinitionLanguage: definitionLanguage,
+                  onChanged: (newType, newTermLanguage, newDefinitionLanguage) {
+                    setState(() {
+                      deckType = newType;
+                      termLanguage = newTermLanguage;
+                      definitionLanguage = newDefinitionLanguage;
+                    });
+                  },
+                ),
+              );
+            },
+            icon: Icon(Icons.tune),
+          ),
           IconButton(
             onPressed: () async {
               final Deck? chosenDeck = await Navigator.push(
