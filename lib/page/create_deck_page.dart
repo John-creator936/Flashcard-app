@@ -146,6 +146,35 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
     }
   }
 
+  Future<void> _pickExistingCards() async {
+    final Deck? chosenDeck = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const DeckPickerPage()),
+    );
+    if (chosenDeck != null) {
+      if (mounted) {
+        List<Flashcard>? selectedCards = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CardPickerPage(deck: chosenDeck),
+          ),
+        );
+        if (selectedCards != null) {
+          final List<EditableExistingCard> editableExistingCards = selectedCards
+              .map((selectedCard) => EditableExistingCard(selectedCard))
+              .toList();
+          setState(() {
+            selectedExistingCards.addAll(editableExistingCards);
+          });
+        }
+      }
+    }
+  }
+
+  Future<void> _scanVocabulary() async {
+    print("scan");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -174,36 +203,31 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
             },
             icon: Icon(Icons.tune),
           ),
-          IconButton(
-            onPressed: () async {
-              final Deck? chosenDeck = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const DeckPickerPage()),
-              );
-              if (chosenDeck != null) {
-                if (context.mounted) {
-                  List<Flashcard>? selectedCards = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CardPickerPage(deck: chosenDeck),
-                    ),
-                  );
-                  if (selectedCards != null) {
-                    final List<EditableExistingCard> editableExistingCards =
-                        selectedCards
-                            .map(
-                              (selectedCard) =>
-                                  EditableExistingCard(selectedCard),
-                            )
-                            .toList();
-                    setState(() {
-                      selectedExistingCards.addAll(editableExistingCards);
-                    });
-                  }
-                }
+          PopupMenuButton<String>(
+            icon: Icon(Icons.playlist_add),
+            onSelected: (value) {
+              if (value == 'deck') {
+                _pickExistingCards();
+              } else if (value == 'photo') {
+                _scanVocabulary();
               }
             },
-            icon: const Icon(Icons.library_add),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'deck',
+                child: ListTile(
+                  leading: Icon(Icons.library_add),
+                  title: Text("Depuis un autre deck"),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'photo',
+                child: ListTile(
+                  leading: Icon(Icons.photo_camera),
+                  title: Text("Depuis une photo"),
+                ),
+              ),
+            ],
           ),
           IconButton(
             onPressed: () async {
