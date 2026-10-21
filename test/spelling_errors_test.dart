@@ -188,4 +188,66 @@ void main() {
       expect(SpellingErrors.generate(''), isEmpty);
     });
   });
+  group('addUmlaut', () {
+    test('u → ü', () {
+      expect(SpellingErrors.addUmlaut('Mutter'), 'Mütter');
+    });
+    test('o → ö', () {
+      expect(SpellingErrors.addUmlaut('schon'), 'schön');
+    });
+    test('A majuscule → Ä', () {
+      expect(SpellingErrors.addUmlaut('Apfel'), 'Äpfel');
+    });
+    test('plusieurs voyelles', () {
+      expect(SpellingErrors.addUmlaut('Haus'), isIn(['Häus', 'Haüs']));
+    });
+    test('eu exclu → null', () {
+      expect(SpellingErrors.addUmlaut('neu'), isNull);
+    });
+    test('ni a, ni o, ni u → null', () {
+      expect(SpellingErrors.addUmlaut('Tisch'), isNull);
+    });
+  });
+
+  group('devoiceFinalConsonant', () {
+    test('d → t', () {
+      expect(SpellingErrors.devoiceFinalConsonant('Hund'), 'Hunt');
+    });
+    test('b → p', () {
+      expect(SpellingErrors.devoiceFinalConsonant('Dieb'), 'Diep');
+    });
+    test('d au milieu ignoré', () {
+      expect(SpellingErrors.devoiceFinalConsonant('Bruder'), isNull);
+    });
+    test('pas de d ni de b final → null', () {
+      expect(SpellingErrors.devoiceFinalConsonant('Haus'), isNull);
+    });
+  });
+
+  group('simplifyTzCk', () {
+    test('tz → z', () {
+      expect(SpellingErrors.simplifyTzCk('Katze'), 'Kaze');
+    });
+    test('ck → k', () {
+      expect(SpellingErrors.simplifyTzCk('Zucker'), 'Zuker');
+    });
+    test('ni tz ni ck → null', () {
+      expect(SpellingErrors.simplifyTzCk('Haus'), isNull);
+    });
+  });
+
+  group('toggleVF', () {
+    test('V → F, majuscule conservée', () {
+      expect(SpellingErrors.toggleVF('Vater'), 'Fater');
+    });
+    test('F → V', () {
+      expect(SpellingErrors.toggleVF('Fenster'), 'Venster');
+    });
+    test('ff : variantes filtrées → null', () {
+      expect(SpellingErrors.toggleVF('Kartoffel'), isNull);
+    });
+    test('ni v ni f → null', () {
+      expect(SpellingErrors.toggleVF('Haus'), isNull);
+    });
+  });
 }

@@ -134,6 +134,59 @@ class SpellingErrors {
     return _pickRandom(possibleErrors);
   }
 
+  static String? _replaceAtEnd(String word, String from, String to) {
+    final lowerWord = word.toLowerCase();
+    if (lowerWord.endsWith(from)) {
+      int i = word.length - from.length;
+      return word.substring(0, i) + to;
+    }
+    return null;
+  }
+
+  static String? _replaceAtStart(String word, String from, String to) {
+    final lowerWord = word.toLowerCase();
+    if (lowerWord.startsWith(from)) {
+      final bool isUpper = word[0] != lowerWord[0];
+      String result = to + word.substring(from.length);
+      if (isUpper && result.isNotEmpty) {
+        result = result[0].toUpperCase() + result.substring(1);
+      }
+      return result;
+    }
+    return null;
+  }
+
+  static String? addUmlaut(String word) => _pickRandom([
+    ..._replaceEachOccurrence(word, 'a', 'ä'),
+    ..._replaceEachOccurrence(word, 'o', 'ö'),
+    ..._replaceEachOccurrence(
+      word,
+      'u',
+      'ü',
+    ).where((variant) => !variant.toLowerCase().contains('eü')),
+  ]);
+
+  static String? devoiceFinalConsonant(String word) => _pickRandom(
+    [
+      _replaceAtEnd(word, 'd', 't'),
+      _replaceAtEnd(word, 'b', 'p'),
+    ].whereType<String>().toList(),
+  );
+
+  static String? simplifyTzCk(String word) => _pickRandom([
+    ..._replaceEachOccurrence(word, 'tz', 'z'),
+    ..._replaceEachOccurrence(word, 'ck', 'k'),
+  ]);
+
+  static String? toggleVF(String word) => _pickRandom([
+    ..._replaceEachOccurrence(word, 'v', 'f'),
+    ..._replaceEachOccurrence(word, 'f', 'v').where(
+      (variant) =>
+          !variant.toLowerCase().contains('vf') &&
+          !variant.toLowerCase().contains('fv'),
+    ),
+  ]);
+
   static const List<SpellingRule> _mainRules = [
     toggleFirstLetterCase,
     toggleDoubleConsonant,
@@ -157,7 +210,7 @@ class SpellingErrors {
     while (errors.length < count && attempts < _maxAttempts) {
       final rule = shuffledRules[attempts % shuffledRules.length];
       final error = rule(answer);
-      if (error != null && error != answer) {
+      if (error != null && error != answer && error.isNotEmpty) {
         errors.add(error);
       }
       attempts++;
