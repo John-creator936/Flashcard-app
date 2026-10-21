@@ -141,7 +141,7 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
                     onPressed: (reviewCards.isNotEmpty)
                         ? () => showReviewModeSheet(
                             context,
-                            deckId: currentDeck.id!,
+                            deck: currentDeck,
                             info: info!,
                             onFinished: _loadCards,
                           )
@@ -225,7 +225,7 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
                         MaterialPageRoute(
                           builder: (context) => MultipleChoiceStudyPage(
                             flashcards: cards,
-                            deckId: currentDeck.id!,
+                            deck: currentDeck,
                           ),
                         ),
                       );

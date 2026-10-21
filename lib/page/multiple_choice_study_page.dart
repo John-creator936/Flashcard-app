@@ -1,5 +1,6 @@
 import 'package:flashcard_app/database/card_repository.dart';
 import 'package:flashcard_app/model/card.dart';
+import 'package:flashcard_app/model/deck.dart';
 import 'package:flashcard_app/model/sm2.dart';
 import 'package:flashcard_app/model/spelling_errors.dart';
 import 'package:flashcard_app/model/study_session.dart';
@@ -12,13 +13,13 @@ import 'package:flutter/material.dart';
 class MultipleChoiceStudyPage extends StatefulWidget {
   final List<Flashcard> flashcards;
   final List<Flashcard>? allCards;
-  final int deckId;
+  final Deck deck;
   final bool isReview;
   const MultipleChoiceStudyPage({
     super.key,
     required this.flashcards,
     this.allCards,
-    required this.deckId,
+    required this.deck,
     this.isReview = false,
   });
 
@@ -74,7 +75,7 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
       if (!isFinished) {
         _saveSession();
       } else if (failedCards.isEmpty) {
-        StudySession.clear(widget.deckId, _mode);
+        StudySession.clear(widget.deck.id!, _mode);
       } else {
         StudySession(
           studyCardIds: failedCards.map((flashcard) => flashcard.id!).toList(),
@@ -83,7 +84,7 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
           deckCardIds: widget.flashcards
               .map((flashcard) => flashcard.id!)
               .toList(),
-        ).save(widget.deckId, _mode);
+        ).save(widget.deck.id!, _mode);
       }
     }
   }
@@ -109,7 +110,7 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
 
   List<String> _buildChoices() {
     List<String> wrongAnswers = [];
-    if (options.spellingTraps) {
+    if (options.spellingTraps && _trapsAllowed) {
       wrongAnswers = SpellingErrors.generate(expectedAnswer);
     }
     if (wrongAnswers.isEmpty) {
@@ -141,6 +142,14 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
       : studyCards[currentCardIndex].term;
   String get expectedAnswer => _answerOf(studyCards[currentCardIndex]);
 
+  String? get answerLanguage => (widget.deck.deckType != 'translation')
+      ? null
+      : (options.reversed)
+      ? widget.deck.termLanguage
+      : widget.deck.definitionLanguage;
+
+  bool get _trapsAllowed => widget.deck.deckType != 'definition';
+
   Color _colorFor(String choice) {
     if (selectedChoice == null) {
       return Colors.white;
@@ -159,7 +168,7 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
       bool spellingTrapsChanged =
           options.spellingTraps != newOptions.spellingTraps;
       options = newOptions;
-      options.save(widget.deckId);
+      options.save(widget.deck.id!);
       if (options.shuffled == true && shuffleChanged) {
         List<Flashcard> studiedCards = studyCards.sublist(0, currentCardIndex);
         List<Flashcard> remainingCards = studyCards.sublist(currentCardIndex);
@@ -185,10 +194,10 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
   }
 
   Future<void> _loadOptions() async {
-    final loadedOptions = await StudyOptions.load(widget.deckId);
+    final loadedOptions = await StudyOptions.load(widget.deck.id!);
     final session = widget.isReview
         ? null
-        : await StudySession.load(widget.deckId, _mode);
+        : await StudySession.load(widget.deck.id!, _mode);
     final isValid =
         session != null &&
         setEquals(
@@ -210,7 +219,7 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
         currentCardIndex = session.currentCardIndex;
       } else {
         if (session != null) {
-          StudySession.clear(widget.deckId, _mode);
+          StudySession.clear(widget.deck.id!, _mode);
         }
         if (options.shuffled) {
           studyCards.shuffle();
@@ -228,7 +237,7 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
       currentCardIndex: currentCardIndex,
       failedCardIds: failedCards.map((flashcard) => flashcard.id!).toList(),
       deckCardIds: widget.flashcards.map((flashcard) => flashcard.id!).toList(),
-    ).save(widget.deckId, _mode);
+    ).save(widget.deck.id!, _mode);
   }
 
   Widget _buildBody() {
@@ -310,7 +319,7 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
                         initialOptions: options,
                         onChanged: _onOptionsChanged,
                         onReset: (widget.isReview) ? null : _resetSession,
-                        showSpellingTraps: true,
+                        showSpellingTraps: _trapsAllowed,
                       ),
                     );
                   }

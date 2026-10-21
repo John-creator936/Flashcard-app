@@ -1,3 +1,4 @@
+import 'package:flashcard_app/model/deck.dart';
 import 'package:flashcard_app/model/deck_review_info.dart';
 import 'package:flashcard_app/page/flashcard_study_page.dart';
 import 'package:flashcard_app/page/multiple_choice_study_page.dart';
@@ -6,7 +7,7 @@ import 'package:flutter/material.dart';
 
 Future<void> showReviewModeSheet(
   BuildContext context, {
-  required int deckId,
+  required Deck deck,
   required DeckReviewInfo info,
   required VoidCallback onFinished,
 }) {
@@ -26,7 +27,7 @@ Future<void> showReviewModeSheet(
                 MaterialPageRoute(
                   builder: (context) => FlashcardStudyPage(
                     flashcards: info.reviewCards,
-                    deckId: deckId,
+                    deckId: deck.id!,
                     isReview: true,
                   ),
                 ),
@@ -43,7 +44,7 @@ Future<void> showReviewModeSheet(
                 MaterialPageRoute(
                   builder: (context) => WrittenStudyPage(
                     flashcards: info.reviewCards,
-                    deckId: deckId,
+                    deckId: deck.id!,
                     isReview: true,
                   ),
                 ),
@@ -65,7 +66,7 @@ Future<void> showReviewModeSheet(
                   builder: (context) => MultipleChoiceStudyPage(
                     flashcards: info.reviewCards,
                     allCards: info.cards,
-                    deckId: deckId,
+                    deck: deck,
                     isReview: true,
                   ),
                 ),

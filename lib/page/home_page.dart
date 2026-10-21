@@ -75,7 +75,7 @@ class _HomePageState extends State<HomePage> {
                           cardCount: info.reviewCards.length,
                           onTap: () => showReviewModeSheet(
                             context,
-                            deckId: deck.id!,
+                            deck: deck,
                             info: info,
                             onFinished: _loadDecks,
                           ),
