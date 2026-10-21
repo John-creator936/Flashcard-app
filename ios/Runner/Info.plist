@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Pour photographier une liste de vocabulaire.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Pour créer des cartes à partir d'une photo de ta liste de vocabulaire.</string>
 </dict>
 </plist>
