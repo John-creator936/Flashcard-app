@@ -22,4 +22,22 @@ class VocabularyParser {
     result = result.replaceAll(RegExp(r"\bI'"), "l'");
     return result.trim();
   }
+
+  static double columnThreshold(List<OcrLine> lines) {
+    final List<double> sortedLefts = lines.map((line) => line.left).toList()
+      ..sort();
+    double maxGap = 0.0;
+    double threshold = 0.0;
+    if (lines.length < 2) {
+      return double.infinity;
+    }
+    for (int i = 0; i < lines.length - 1; i++) {
+      double gap = sortedLefts[i + 1] - sortedLefts[i];
+      if (gap > maxGap) {
+        maxGap = gap;
+        threshold = (sortedLefts[i + 1] + sortedLefts[i]) / 2;
+      }
+    }
+    return threshold;
+  }
 }

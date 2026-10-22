@@ -28,4 +28,28 @@ void main() {
       expect(VocabularyParser.cleanText('  la machine  '), 'la machine');
     });
   });
+
+  OcrLine lineAt(double left) => OcrLine(text: '', left: left, top: 0);
+
+  group('columnThreshold', () {
+    test('deux colonnes : frontière au milieu du plus grand écart', () {
+      final lines = [
+        1544,
+        275,
+        593,
+        1853,
+        360,
+      ].map((x) => lineAt(x.toDouble())).toList();
+      expect(VocabularyParser.columnThreshold(lines), 1068.5);
+    });
+    test('deux lignes', () {
+      expect(VocabularyParser.columnThreshold([lineAt(100), lineAt(500)]), 300);
+    });
+    test('une seule ligne → infini', () {
+      expect(VocabularyParser.columnThreshold([lineAt(100)]), double.infinity);
+    });
+    test('aucune ligne → infini', () {
+      expect(VocabularyParser.columnThreshold([]), double.infinity);
+    });
+  });
 }
