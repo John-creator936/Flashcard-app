@@ -40,4 +40,23 @@ class VocabularyParser {
     }
     return threshold;
   }
+
+  static bool _isContinuation(String previous, String current) {
+    return previous.endsWith(',') ||
+        (current.startsWith('(') && current.endsWith(')'));
+  }
+
+  static List<String> mergeEntries(List<OcrLine> column) {
+    final sortedLines = [...column]..sort((a, b) => a.top.compareTo(b.top));
+    List<String> entries = [];
+    for (final line in sortedLines) {
+      final text = cleanText(line.text);
+      if (entries.isNotEmpty && _isContinuation(entries.last, text)) {
+        entries.last = '${entries.last} $text';
+      } else {
+        entries.add(text);
+      }
+    }
+    return entries;
+  }
 }

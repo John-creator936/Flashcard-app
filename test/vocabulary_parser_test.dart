@@ -52,4 +52,55 @@ void main() {
       expect(VocabularyParser.columnThreshold([]), double.infinity);
     });
   });
+
+  OcrLine textLine(String text, double top) =>
+      OcrLine(text: text, left: 0, top: top);
+
+  group('mergeEntries', () {
+    test('lignes triées de haut en bas', () {
+      final lines = [
+        textLine('das Werk, e', 446),
+        textLine('der Kern, e', 228),
+      ];
+      expect(VocabularyParser.mergeEntries(lines), [
+        'der Kern, e',
+        'das Werk, e',
+      ]);
+    });
+    test('suite après une virgule', () {
+      final lines = [
+        textLine('unternehmen unternimmt, unternahm,', 1168),
+        textLine('hat unternommen', 1312),
+        textLine('das Unternehmen, -', 1443),
+      ];
+      expect(VocabularyParser.mergeEntries(lines), [
+        'unternehmen unternimmt, unternahm, hat unternommen',
+        'das Unternehmen, -',
+      ]);
+    });
+    test('ligne entièrement entre parenthèses', () {
+      final lines = [
+        textLine('der Ingenieur, e / die -in', 3263),
+        textLine('(prononc. fr.)', 3341),
+      ];
+      expect(VocabularyParser.mergeEntries(lines), [
+        'der Ingenieur, e / die -in (prononc. fr.)',
+      ]);
+    });
+    test('parenthèse seulement au début : entrée à part', () {
+      final lines = [
+        textLine("1. l'exploitation, l'usine 2. l'activite", 888),
+        textLine('(mettre) hors service, en service', 965),
+      ];
+      expect(VocabularyParser.mergeEntries(lines), hasLength(2));
+    });
+    test('texte nettoyé', () {
+      expect(VocabularyParser.mergeEntries([textLine('der Kęrn, e', 0)]), [
+        'der Kern, e',
+      ]);
+    });
+    test('colonne vide', () {
+      expect(VocabularyParser.mergeEntries([]), isEmpty);
+    });
+  });
 }
