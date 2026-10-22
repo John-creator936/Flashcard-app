@@ -201,9 +201,26 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
     }
 
     final pairs = VocabularyParser.parse(ocrLines);
-    for (final pair in pairs) {
-      print('${pair.term}  →  ${pair.definition}');
+    if (!mounted) return;
+    if (pairs.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Aucun mot reconnu sur cette photo.")),
+      );
+      return;
     }
+    setState(() {
+      for (final pair in pairs) {
+        termControllers.add(TextEditingController(text: pair.term));
+        definitionControllers.add(TextEditingController(text: pair.definition));
+      }
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          "${pairs.length} ${(pairs.length > 1) ? "cartes ajoutées" : "carte ajoutée"} : vérifie-les avant d'enregistrer.",
+        ),
+      ),
+    );
   }
 
   @override
