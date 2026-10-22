@@ -21,6 +21,7 @@ class VocabularyParser {
     'ą': 'a',
     'į': 'i',
     'ų': 'u',
+    'ė': 'e',
   };
 
   static String cleanText(String text) {
@@ -69,10 +70,22 @@ class VocabularyParser {
     return entries;
   }
 
+  static bool _isNoise(String text) {
+    return RegExp(r'^\d+$').hasMatch(text) ||
+        RegExp(r'^\d+\.\d+').hasMatch(text);
+  }
+
   static List<VocabularyPair> parse(List<OcrLine> lines) {
-    final threshold = columnThreshold(lines);
-    final leftLines = lines.where((line) => line.left < threshold).toList();
-    final rightLines = lines.where((line) => line.left >= threshold).toList();
+    final usefulLines = lines
+        .where((line) => !_isNoise(cleanText(line.text)))
+        .toList();
+    final threshold = columnThreshold(usefulLines);
+    final leftLines = usefulLines
+        .where((line) => line.left < threshold)
+        .toList();
+    final rightLines = usefulLines
+        .where((line) => line.left >= threshold)
+        .toList();
     final terms = mergeEntries(leftLines);
     final definitions = mergeEntries(rightLines);
     final pairCount = max(terms.length, definitions.length);

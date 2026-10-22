@@ -202,5 +202,25 @@ void main() {
       expect(pairs[1].term, 'das Werk, e');
       expect(pairs[1].definition, '');
     });
+    test('titre de section et numéro de page ignorés', () {
+      final pairs = VocabularyParser.parse([
+        at('10.3 Literatur', 100, 0),
+        at('die Literatur, en', 100, 100),
+        at('das Buch, "er', 100, 200),
+        at('la littérature', 900, 90),
+        at('le livre', 900, 190),
+        at('139', 950, 900),
+      ]);
+      expect(pairs, hasLength(2));
+      expect(pairs[0].term, 'die Literatur, en');
+      expect(pairs[0].definition, 'la littérature');
+    });
+    test('un sens numéroté n\'est pas du bruit', () {
+      final pairs = VocabularyParser.parse([
+        at('die Seite, n', 100, 0),
+        at('1. le côté, la face 2. la page', 900, 0),
+      ]);
+      expect(pairs.single.definition, '1. le côté, la face 2. la page');
+    });
   });
 }

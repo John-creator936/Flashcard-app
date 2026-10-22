@@ -4,6 +4,7 @@ import 'package:flashcard_app/database/deck_repository.dart';
 import 'package:flashcard_app/model/card.dart';
 import 'package:flashcard_app/model/deck.dart';
 import 'package:flashcard_app/model/deck_card.dart';
+import 'package:flashcard_app/model/vocabulary_parser.dart';
 import 'package:flashcard_app/page/card_picker_page.dart';
 import 'package:flashcard_app/page/deck_picker_page.dart';
 import 'package:flashcard_app/widget/deck_settings_sheet.dart';
@@ -186,10 +187,22 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
       inputImage,
     );
     textRecognizer.close();
+    final List<OcrLine> ocrLines = [];
     for (final block in recognizedText.blocks) {
       for (final line in block.lines) {
-        print('${line.boundingBox}  ${line.text}');
+        ocrLines.add(
+          OcrLine(
+            text: line.text,
+            left: line.cornerPoints[0].x.toDouble(),
+            top: line.cornerPoints[0].y.toDouble(),
+          ),
+        );
       }
+    }
+
+    final pairs = VocabularyParser.parse(ocrLines);
+    for (final pair in pairs) {
+      print('${pair.term}  →  ${pair.definition}');
     }
   }
 
