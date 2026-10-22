@@ -10,6 +10,8 @@ import 'package:flashcard_app/widget/deck_settings_sheet.dart';
 import 'package:flashcard_app/widget/editable_existing_card.dart';
 import 'package:flashcard_app/widget/flashcard_input.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
 class CreateDeckPage extends StatefulWidget {
   final Deck? existingDeck;
@@ -172,7 +174,23 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
   }
 
   Future<void> _scanVocabulary() async {
-    print("scan");
+    final XFile? pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+    );
+    if (pickedFile == null) return;
+    final InputImage inputImage = InputImage.fromFilePath(pickedFile.path);
+    final TextRecognizer textRecognizer = TextRecognizer(
+      script: TextRecognitionScript.latin,
+    );
+    final RecognizedText recognizedText = await textRecognizer.processImage(
+      inputImage,
+    );
+    textRecognizer.close();
+    for (final block in recognizedText.blocks) {
+      for (final line in block.lines) {
+        print('${line.boundingBox}  ${line.text}');
+      }
+    }
   }
 
   @override
