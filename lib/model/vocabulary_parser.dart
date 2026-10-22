@@ -1,9 +1,18 @@
+import 'dart:math';
+
 class OcrLine {
   final String text;
   final double left;
   final double top;
 
   const OcrLine({required this.text, required this.left, required this.top});
+}
+
+class VocabularyPair {
+  final String term;
+  final String definition;
+
+  const VocabularyPair({required this.term, required this.definition});
 }
 
 class VocabularyParser {
@@ -58,5 +67,21 @@ class VocabularyParser {
       }
     }
     return entries;
+  }
+
+  static List<VocabularyPair> parse(List<OcrLine> lines) {
+    final threshold = columnThreshold(lines);
+    final leftLines = lines.where((line) => line.left < threshold).toList();
+    final rightLines = lines.where((line) => line.left >= threshold).toList();
+    final terms = mergeEntries(leftLines);
+    final definitions = mergeEntries(rightLines);
+    final pairCount = max(terms.length, definitions.length);
+    final List<VocabularyPair> pairs = [];
+    for (int i = 0; i < pairCount; i++) {
+      final term = (i < terms.length) ? terms[i] : '';
+      final definition = (i < definitions.length) ? definitions[i] : '';
+      pairs.add(VocabularyPair(term: term, definition: definition));
+    }
+    return pairs;
   }
 }
