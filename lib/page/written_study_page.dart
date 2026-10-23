@@ -1,4 +1,5 @@
 import 'package:flashcard_app/database/card_repository.dart';
+import 'package:flashcard_app/model/answer_checker.dart';
 import 'package:flashcard_app/model/card.dart';
 import 'package:flashcard_app/model/sm2.dart';
 import 'package:flashcard_app/model/study_session.dart';
@@ -51,11 +52,10 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
 
   void _checkAnswer() {
     setState(() {
-      if (answerController.text == expectedAnswer) {
-        isCorrect = true;
-      } else {
-        isCorrect = false;
-      }
+      isCorrect = AnswerChecker.isCorrect(
+        answerController.text,
+        expectedAnswer,
+      );
     });
   }
 
