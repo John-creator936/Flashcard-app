@@ -34,9 +34,11 @@ class SpellingErrors {
 
   // Outils
 
+  /// Vérifie si la lettre est une voyelle.
   static bool _isVowel(String letter) =>
       (_vowels.contains(letter.toLowerCase()));
 
+  /// Vérifie si la consonne peut être doublée.
   static bool _isDoublableConsonant(String letter) {
     if (letter.toLowerCase() == letter.toUpperCase()) return false;
     if (_isVowel(letter)) return false;
@@ -44,11 +46,13 @@ class SpellingErrors {
     return true;
   }
 
+  /// Choisit une erreur au hasard dans une liste, ou renvoie null si elle est vide.
   static String? _pickRandom(List<String> possibleErrors) {
     if (possibleErrors.isEmpty) return null;
     return possibleErrors[Random().nextInt(possibleErrors.length)];
   }
 
+  /// Renvoie une variante du mot pour chaque occurrence de [from] remplacée par [to].
   static List<String> _replaceEachOccurrence(
     String word,
     String from,
@@ -68,6 +72,7 @@ class SpellingErrors {
     return variants;
   }
 
+  /// Remplace la fin d'un mot. [minPrefix] évite de toucher les mots trop courts (table → tible).
   static String? _replaceAtEnd(
     String word,
     String from,
@@ -84,6 +89,7 @@ class SpellingErrors {
     return null;
   }
 
+  /// Remplace le début d'un mot, en gardant la majuscule initiale.
   static String? _replaceAtStart(String word, String from, String to) {
     final lowerWord = word.toLowerCase();
     if (lowerWord.startsWith(from)) {
@@ -99,6 +105,7 @@ class SpellingErrors {
 
   // Règles générales
 
+  /// Met la première lettre en majuscule ou en minuscule.
   static String? toggleFirstLetterCase(String word) {
     if (word.isEmpty) return null;
     final firstLetter = word[0];
@@ -110,6 +117,7 @@ class SpellingErrors {
     return toggledLetter + rest;
   }
 
+  /// Simplifie une consonne doublée, ou double une consonne placée entre deux voyelles.
   static String? toggleDoubleConsonant(String word) {
     final List<String> possibleErrors = [];
     for (int i = 0; i <= word.length - 2; i++) {
@@ -129,6 +137,7 @@ class SpellingErrors {
     return _pickRandom(possibleErrors);
   }
 
+  /// Remplace une lettre accentuée par une lettre souvent confondue.
   static String? changeAccent(String word) {
     final List<String> possibleErrors = [];
     for (int i = 0; i <= word.length - 1; i++) {
@@ -147,11 +156,13 @@ class SpellingErrors {
     return _pickRandom(possibleErrors);
   }
 
+  /// Inverse « ie » et « ei » (die Biene → die Beine).
   static String? toggleIeEi(String word) => _pickRandom([
     ..._replaceEachOccurrence(word, 'ie', 'ei'),
     ..._replaceEachOccurrence(word, 'ei', 'ie'),
   ]);
 
+  /// Échange « ph » et « f ». Ignore les cas comme « phf », qui ne ressemblent à aucun mot.
   static String? togglePhF(String word) => _pickRandom([
     ..._replaceEachOccurrence(
       word,
@@ -163,6 +174,7 @@ class SpellingErrors {
 
   // Règles de réserve
 
+  /// Règle de réserve : supprime une lettre, jamais la première.
   static String? deleteLetter(String word) {
     final List<String> possibleErrors = [];
     for (int i = 1; i <= word.length - 1; i++) {
@@ -171,6 +183,7 @@ class SpellingErrors {
     return _pickRandom(possibleErrors);
   }
 
+  /// Règle de réserve : inverse deux lettres voisines, sans déplacer une majuscule initiale.
   static String? swapAdjacentLetters(String word) {
     final List<String> possibleErrors = [];
     for (int i = 0; i <= word.length - 2; i++) {
@@ -186,6 +199,7 @@ class SpellingErrors {
 
   // Allemand
 
+  /// Allemand : ajoute un umlaut sur a, o ou u.
   static String? addUmlaut(String word) => _pickRandom([
     ..._replaceEachOccurrence(word, 'a', 'ä'),
     ..._replaceEachOccurrence(word, 'o', 'ö'),
@@ -196,6 +210,7 @@ class SpellingErrors {
     ).where((variant) => !variant.toLowerCase().contains('eü')),
   ]);
 
+  /// Allemand : écrit la consonne finale comme on l'entend (d → t, b → p).
   static String? devoiceFinalConsonant(String word) => _pickRandom(
     [
       _replaceAtEnd(word, 'd', 't'),
@@ -203,11 +218,13 @@ class SpellingErrors {
     ].whereType<String>().toList(),
   );
 
+  /// Allemand : remplace tz → z et ck → k.
   static String? simplifyTzCk(String word) => _pickRandom([
     ..._replaceEachOccurrence(word, 'tz', 'z'),
     ..._replaceEachOccurrence(word, 'ck', 'k'),
   ]);
 
+  /// Allemand : remplace v → f et f → v (ignore les variantes avec 'vf' ou 'fv').
   static String? toggleVF(String word) => _pickRandom([
     ..._replaceEachOccurrence(word, 'v', 'f'),
     ..._replaceEachOccurrence(word, 'f', 'v').where(
@@ -219,6 +236,7 @@ class SpellingErrors {
 
   // Français
 
+  /// Français : retire une lettre muette en fin de mot ou un h initial.
   static String? dropSilentLetter(String word) => _pickRandom(
     [
       _replaceAtEnd(word, 't', ''),
@@ -230,6 +248,7 @@ class SpellingErrors {
     ].whereType<String>().toList(),
   );
 
+  /// Français : confond la terminaison avec é, er ou ez.
   static String? toggleFrenchEnding(String word) => _pickRandom(
     [
       _replaceAtEnd(word, 'é', 'er'),
@@ -241,6 +260,7 @@ class SpellingErrors {
     ].whereType<String>().toList(),
   );
 
+  /// Français et anglais : confond les terminaisons « ent » et « ant ».
   static String? toggleEntAnt(String word) => _pickRandom(
     [
       _replaceAtEnd(word, 'ent', 'ant', minPrefix: 3),
@@ -248,6 +268,7 @@ class SpellingErrors {
     ].whereType<String>().toList(),
   );
 
+  /// Français : confond « eau », « au » et « o ».
   static String? toggleEauAuO(String word) => _pickRandom(
     (word.toLowerCase().contains('eau'))
         ? [
@@ -266,6 +287,7 @@ class SpellingErrors {
 
   // Anglais
 
+  /// Anglais : retire une lettre muette (kn-, wr-, wh-, -mb).
   static String? dropEnglishSilentLetter(String word) => _pickRandom(
     [
       _replaceAtEnd(word, 'mb', 'm'),
@@ -275,6 +297,7 @@ class SpellingErrors {
     ].whereType<String>().toList(),
   );
 
+  /// Anglais : confond les terminaisons « able » et « ible ».
   static String? toggleAbleIble(String word) => _pickRandom(
     [
       _replaceAtEnd(word, 'able', 'ible', minPrefix: 3),
@@ -284,6 +307,7 @@ class SpellingErrors {
 
   // Générateur
 
+  /// Règles générales, utilisées pour toutes les langues.
   static const List<SpellingRule> _mainRules = [
     toggleFirstLetterCase,
     toggleDoubleConsonant,
@@ -291,16 +315,25 @@ class SpellingErrors {
     toggleIeEi,
     togglePhF,
   ];
+
+  /// Règles de réserve, utilisées seulement s'il manque des fautes.
   static const List<SpellingRule> _backupRules = [
     deleteLetter,
     swapAdjacentLetters,
   ];
+
+  /// Règles propres à chaque langue, ajoutées aux règles générales.
   static const Map<String, List<SpellingRule>> _languageRules = {
     'de': [addUmlaut, devoiceFinalConsonant, simplifyTzCk, toggleVF],
     'fr': [dropSilentLetter, toggleFrenchEnding, toggleEntAnt, toggleEauAuO],
     'en': [dropEnglishSilentLetter, toggleAbleIble, toggleEntAnt],
   };
 
+  /// Ajoute à [errors] des fautes tirées de [rules], jusqu'à en avoir [count].
+  ///
+  /// Les règles sont mélangées puis essayées à tour de rôle : une règle peut
+  /// servir plusieurs fois et donner une autre faute. [_maxAttempts] arrête la
+  /// boucle si le mot ne permet pas d'en trouver assez.
   static void _addErrors(
     String answer,
     List<SpellingRule> rules,
@@ -319,6 +352,10 @@ class SpellingErrors {
     }
   }
 
+  /// Renvoie jusqu'à [count] fautes différentes pour [answer].
+  ///
+  /// Les règles principales et celles de [language] passent d'abord, puis les
+  /// règles de réserve complètent si besoin. Le `Set` évite les doublons.
   static List<String> generate(
     String answer, {
     String? language,
