@@ -4,7 +4,10 @@ typedef SpellingRule = String? Function(String word);
 
 class SpellingErrors {
   static const _vowels = 'aeiouyàâäéèêëîïôöûüù';
-  static const _neverDoubled = 'hjqwxy'; //TODO: Vérifier source
+
+  /// Lettres qui ne sont presque jamais doublées en français, allemand et anglais
+  /// (observation, et non une règle tirée d'une source).
+  static const _neverDoubled = 'hjqwxy';
   static const Map<String, List<String>> _accentConfusions = {
     'é': ['e', 'è', 'ê'],
     'è': ['e', 'é'],

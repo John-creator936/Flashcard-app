@@ -20,6 +20,7 @@ class _DeckPickerPageState extends State<DeckPickerPage> {
 
   Future<void> _loadDecks() async {
     final decks = await DeckRepository().readAllDecks();
+    if (!mounted) return;
     setState(() {
       allDecks = decks;
     });
@@ -28,6 +29,7 @@ class _DeckPickerPageState extends State<DeckPickerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text("Choisir un deck")),
       body: ListView.builder(
         itemCount: allDecks.length,
         itemBuilder: (context, index) {

@@ -47,6 +47,7 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
     final loadedCards = await CardRepository().readCardsByDeck(
       widget.existingDeck!.id!,
     );
+    if (!mounted) return;
     setState(() {
       final List<EditableExistingCard> editableExistingCards = loadedCards
           .map((loadedCard) => EditableExistingCard(loadedCard))

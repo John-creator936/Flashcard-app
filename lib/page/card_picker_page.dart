@@ -23,6 +23,7 @@ class _CardPickerPageState extends State<CardPickerPage> {
 
   Future<void> _loadCards() async {
     final loadedCards = await CardRepository().readCardsByDeck(widget.deck.id!);
+    if (!mounted) return;
     setState(() {
       cards = loadedCards;
     });
@@ -32,7 +33,7 @@ class _CardPickerPageState extends State<CardPickerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Sauvegardage des cartes"),
+        title: Text("Choisir des cartes"),
         actions: [
           IconButton(
             onPressed: () {
