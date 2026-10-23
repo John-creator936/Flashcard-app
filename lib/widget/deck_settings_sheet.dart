@@ -1,6 +1,9 @@
 import 'package:flashcard_app/model/deck.dart';
 import 'package:flutter/material.dart';
 
+/// Menu de réglage du type de deck et, pour le vocabulaire, des langues.
+///
+/// Chaque changement est envoyé tout de suite à [onChanged].
 class DeckSettingsSheet extends StatefulWidget {
   final String initialDeckType;
   final String? initialTermLanguage;
@@ -42,6 +45,7 @@ class _DeckSettingsSheetState extends State<DeckSettingsSheet> {
     definitionLanguage = widget.initialDefinitionLanguage;
   }
 
+  /// Envoie les réglages actuels à [onChanged].
   void _notify() {
     widget.onChanged(deckType, termLanguage, definitionLanguage);
   }

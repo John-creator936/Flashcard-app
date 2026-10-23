@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Deux champs de saisie pour le terme et la définition d'une carte.
 class FlashcardInput extends StatelessWidget {
   final TextEditingController termController;
   final TextEditingController definitionController;

@@ -1,10 +1,12 @@
 import 'package:flashcard_app/model/progress_stats.dart';
 import 'package:flutter/material.dart';
 
+/// Affiche les quatre chiffres de « Ma progression ».
 class ProgressSummary extends StatelessWidget {
   final ProgressStats stats;
   const ProgressSummary({super.key, required this.stats});
 
+  /// Un chiffre en gras, avec son nom en dessous.
   Widget _buildStat(String label, int value) {
     return Column(
       children: [

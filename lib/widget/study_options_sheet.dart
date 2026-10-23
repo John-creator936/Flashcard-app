@@ -1,10 +1,17 @@
 import 'package:flashcard_app/model/study_options.dart';
 import 'package:flutter/material.dart';
 
+/// Menu des options d'un mode : inverser, mélanger et, en QCM, pièges d'orthographe.
+///
+/// Les options s'appliquent dès qu'on les change, sans bouton de validation.
 class StudyOptionsSheet extends StatefulWidget {
   final StudyOptions initialOptions;
   final ValueChanged<StudyOptions> onChanged;
+
+  /// Bouton « Réinitialiser », caché si `null` (en Révision).
   final VoidCallback? onReset;
+
+  /// Affiche l'option des pièges, seulement en QCM.
   final bool showSpellingTraps;
 
   const StudyOptionsSheet({

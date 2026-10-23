@@ -4,8 +4,12 @@ import 'package:flashcard_app/model/text_utils.dart';
 import 'package:flashcard_app/page/deck_detail_page.dart';
 import 'package:flutter/material.dart';
 
+/// Carte d'un deck dans « Mes unités » : nom, type, nombre de cartes,
+/// et une poubelle pour le supprimer.
 class DeckTile extends StatelessWidget {
   final Deck deck;
+
+  /// Appelé après une suppression ou un retour du deck, pour recharger l'accueil.
   final VoidCallback onDeckChanged;
   final int cardCount;
   const DeckTile({
@@ -15,6 +19,7 @@ class DeckTile extends StatelessWidget {
     required this.cardCount,
   });
 
+  /// Demande confirmation avant de supprimer le deck.
   void _confirmDelete(BuildContext context) {
     showDialog(
       context: context,
@@ -42,6 +47,7 @@ class DeckTile extends StatelessWidget {
     );
   }
 
+  /// Type du deck, avec ses langues pour le vocabulaire (« de → fr »).
   String get _subtitle {
     if (deck.deckType == 'translation') {
       if (deck.termLanguage == null && deck.definitionLanguage == null) {

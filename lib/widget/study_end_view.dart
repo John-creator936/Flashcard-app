@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 
+/// Écran de fin d'un tour : score et boutons pour continuer.
 class StudyEndView extends StatelessWidget {
   final int correctCount;
   final int totalCount;
+
+  /// Relance les cartes ratées. `null` s'il n'y en a pas : le bouton est caché.
   final VoidCallback? onRetryFailed;
+
+  /// Recommence tout le deck. `null` en Révision : le bouton est caché.
   final VoidCallback? onReset;
 
   const StudyEndView({

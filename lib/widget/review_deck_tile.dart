@@ -1,6 +1,7 @@
 import 'package:flashcard_app/model/deck.dart';
 import 'package:flutter/material.dart';
 
+/// Carte d'un deck dans « Révisions du jour », avec le nombre de cartes à revoir.
 class ReviewDeckTile extends StatelessWidget {
   final Deck deck;
   final int cardCount;
