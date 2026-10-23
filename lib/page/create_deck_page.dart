@@ -84,8 +84,7 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
   /// Enregistre le deck en cours de création ou de modification.
   ///
   /// Si `widget.existingDeck` est fourni, le deck est mis à jour (nouveau titre,
-  /// date de création conservée) ; sinon, un nouveau deck est créé.
-  /// mis à jour (nouveau titre, type et langues, date de création conservée)
+  /// type et langues, date de création conservée) ; sinon, un nouveau deck est créé.
   Future<void> _saveDeck() async {
     final DateTime createdTime = DateTime.now();
     final deckRepository = DeckRepository();
@@ -118,19 +117,12 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
           definitionControllers[i].text.isEmpty) {
         continue;
       }
-      final DateTime flashcardCreatedTime = DateTime.now();
-      final flashcard = Flashcard(
-        definition: definitionControllers[i].text,
-        term: termControllers[i].text,
-        createdTime: flashcardCreatedTime,
-      );
-      Flashcard savedFlashcard = await cardRepository.create(flashcard);
-      DeckCardLink link = DeckCardLink(
+      await DeckCardRepository().createCardInDeck(
         deckId: savedDeck.id!,
-        cardId: savedFlashcard.id!,
+        term: termControllers[i].text,
+        definition: definitionControllers[i].text,
         createdTime: createdTime,
       );
-      await DeckCardRepository().linkCardToDeck(link);
     }
 
     for (int i = 0; i < selectedExistingCards.length; i++) {

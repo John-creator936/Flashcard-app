@@ -1,11 +1,8 @@
 import 'dart:convert';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flashcard_app/database/card_repository.dart';
 import 'package:flashcard_app/database/deck_card_repository.dart';
 import 'package:flashcard_app/model/app_clock.dart';
-import 'package:flashcard_app/model/card.dart';
-import 'package:flashcard_app/model/deck_card.dart';
 import 'package:flashcard_app/model/deck_review_info.dart';
 import 'package:flashcard_app/model/deck_share.dart';
 import 'package:flashcard_app/model/progress_stats.dart';
@@ -83,20 +80,13 @@ class _HomePageState extends State<HomePage> {
         definitionLanguage: shared.definitionLanguage,
       ),
     );
-    CardRepository cardRepository = CardRepository();
     for (final pair in shared.cards) {
-      final flashcard = Flashcard(
-        definition: pair.definition,
-        term: pair.term,
-        createdTime: now,
-      );
-      Flashcard savedFlashcard = await cardRepository.create(flashcard);
-      DeckCardLink link = DeckCardLink(
+      await DeckCardRepository().createCardInDeck(
         deckId: savedDeck.id!,
-        cardId: savedFlashcard.id!,
+        term: pair.term,
+        definition: pair.definition,
         createdTime: now,
       );
-      await DeckCardRepository().linkCardToDeck(link);
     }
     await _loadDecks();
     if (!mounted) return;
