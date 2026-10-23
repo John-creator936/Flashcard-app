@@ -6,6 +6,7 @@ import 'package:flashcard_app/model/deck.dart';
 import 'package:flashcard_app/model/deck_review_info.dart';
 import 'package:flashcard_app/model/deck_share.dart';
 import 'package:flashcard_app/model/review_limit.dart';
+import 'package:flashcard_app/model/text_utils.dart';
 import 'package:flashcard_app/page/create_deck_page.dart';
 import 'package:flashcard_app/page/flashcard_study_page.dart';
 import 'package:flashcard_app/page/multiple_choice_study_page.dart';
@@ -107,7 +108,7 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
 
   String _reviewTitle() {
     if (reviewCards.isNotEmpty) {
-      return "${reviewCards.length} ${(reviewCards.length == 1) ? "carte" : "cartes"} à réviser";
+      return "${cardCountLabel(reviewCards.length)} à réviser";
     }
     if (remainingToday == 0) {
       return "Limite du jour atteinte";

@@ -1,5 +1,6 @@
 import 'package:flashcard_app/database/deck_repository.dart';
 import 'package:flashcard_app/model/deck.dart';
+import 'package:flashcard_app/model/text_utils.dart';
 import 'package:flashcard_app/page/deck_detail_page.dart';
 import 'package:flutter/material.dart';
 
@@ -98,7 +99,7 @@ class DeckTile extends StatelessWidget {
                   style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
                 Spacer(),
-                Text("$cardCount ${(cardCount > 1) ? "cartes" : "carte"}"),
+                Text(cardCountLabel(cardCount)),
               ],
             ),
           ),

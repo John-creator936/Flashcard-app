@@ -6,6 +6,7 @@ import 'package:flashcard_app/model/app_clock.dart';
 import 'package:flashcard_app/model/deck_review_info.dart';
 import 'package:flashcard_app/model/deck_share.dart';
 import 'package:flashcard_app/model/progress_stats.dart';
+import 'package:flashcard_app/model/text_utils.dart';
 import 'package:flashcard_app/page/create_deck_page.dart';
 import 'package:flashcard_app/widget/deck_search_view.dart';
 import 'package:flashcard_app/widget/deck_tile.dart';
@@ -92,9 +93,7 @@ class _HomePageState extends State<HomePage> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          "Deck importé : ${shared.cards.length} ${(shared.cards.length > 1) ? "cartes" : "carte"}",
-        ),
+        content: Text("Deck importé : ${cardCountLabel(shared.cards.length)}"),
       ),
     );
   }
