@@ -8,9 +8,11 @@ import 'package:flashcard_app/model/card.dart';
 import 'package:flashcard_app/model/deck_card.dart';
 import 'package:flashcard_app/model/deck_review_info.dart';
 import 'package:flashcard_app/model/deck_share.dart';
+import 'package:flashcard_app/model/progress_stats.dart';
 import 'package:flashcard_app/page/create_deck_page.dart';
 import 'package:flashcard_app/widget/deck_search_view.dart';
 import 'package:flashcard_app/widget/deck_tile.dart';
+import 'package:flashcard_app/widget/progress_summary.dart';
 import 'package:flashcard_app/widget/review_deck_tile.dart';
 import 'package:flashcard_app/widget/review_mode_sheet.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +31,7 @@ class _HomePageState extends State<HomePage> {
   List<Deck> allDecks = [];
   Map<int, DeckReviewInfo> reviewInfos = {};
   Map<int, int> cardCounts = {};
+  ProgressStats? progressStats;
 
   @override
   void initState() {
@@ -44,11 +47,13 @@ class _HomePageState extends State<HomePage> {
       infos[deck.id!] = await DeckReviewInfo.load(deck.id!, now);
     }
     final counts = await DeckCardRepository().countCardsPerDeck();
+    final stats = await CardRepository().readProgressStats(now);
     if (!mounted) return;
     setState(() {
       allDecks = decks;
       reviewInfos = infos;
       cardCounts = counts;
+      progressStats = stats;
     });
   }
 
@@ -113,35 +118,60 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: (currentPage == 2)
           ? DeckSearchView(allDecks: allDecks)
-          : Column(
-              children: [
-                SizedBox(height: 60),
-                Text(
-                  "Révisions du jour",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10),
-                if (decksToReview.isEmpty)
-                  Text("Tout est à jour !")
-                else
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  SizedBox(height: 60),
+                  Text(
+                    "Révisions du jour",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10),
+                  if (decksToReview.isEmpty)
+                    Text("Tout est à jour !")
+                  else
+                    SizedBox(
+                      height: 120,
+                      child: ListView.separated(
+                        itemCount: decksToReview.length,
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        itemBuilder: (context, index) {
+                          final deck = decksToReview[index];
+                          final info = reviewInfos[deck.id]!;
+                          return ReviewDeckTile(
+                            deck: deck,
+                            cardCount: info.reviewCards.length,
+                            onTap: () => showReviewModeSheet(
+                              context,
+                              deck: deck,
+                              info: info,
+                              onFinished: _loadDecks,
+                            ),
+                          );
+                        },
+                        separatorBuilder: (context, index) {
+                          return const SizedBox(width: 10);
+                        },
+                      ),
+                    ),
+                  SizedBox(height: 60),
+                  Text(
+                    "Mes unités",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10),
                   SizedBox(
-                    height: 120,
+                    height: 160,
                     child: ListView.separated(
-                      itemCount: decksToReview.length,
+                      itemCount: allDecks.length,
                       scrollDirection: Axis.horizontal,
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       itemBuilder: (context, index) {
-                        final deck = decksToReview[index];
-                        final info = reviewInfos[deck.id]!;
-                        return ReviewDeckTile(
-                          deck: deck,
-                          cardCount: info.reviewCards.length,
-                          onTap: () => showReviewModeSheet(
-                            context,
-                            deck: deck,
-                            info: info,
-                            onFinished: _loadDecks,
-                          ),
+                        return DeckTile(
+                          deck: allDecks[index],
+                          onDeckChanged: _loadDecks,
+                          cardCount: cardCounts[allDecks[index].id!] ?? 0,
                         );
                       },
                       separatorBuilder: (context, index) {
@@ -149,31 +179,17 @@ class _HomePageState extends State<HomePage> {
                       },
                     ),
                   ),
-                SizedBox(height: 60),
-                Text(
-                  "Mes unités",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10),
-                SizedBox(
-                  height: 160,
-                  child: ListView.separated(
-                    itemCount: allDecks.length,
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    itemBuilder: (context, index) {
-                      return DeckTile(
-                        deck: allDecks[index],
-                        onDeckChanged: _loadDecks,
-                        cardCount: cardCounts[allDecks[index].id!] ?? 0,
-                      );
-                    },
-                    separatorBuilder: (context, index) {
-                      return const SizedBox(width: 10);
-                    },
+                  SizedBox(height: 60),
+                  Text(
+                    "Ma progression",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                ),
-              ],
+                  SizedBox(height: 10),
+                  if (progressStats != null)
+                    ProgressSummary(stats: progressStats!),
+                  SizedBox(height: 20),
+                ],
+              ),
             ),
       bottomNavigationBar: BottomNavigationBar(
         iconSize: 35,
