@@ -114,6 +114,10 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
     final cardRepository = CardRepository();
 
     for (int i = 0; i < termControllers.length; i++) {
+      if (termControllers[i].text.isEmpty &&
+          definitionControllers[i].text.isEmpty) {
+        continue;
+      }
       final DateTime flashcardCreatedTime = DateTime.now();
       final flashcard = Flashcard(
         definition: definitionControllers[i].text,
@@ -223,6 +227,25 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
     );
   }
 
+  String? _validationError() {
+    if (titleController.text.trim().isEmpty) {
+      return "Donne un nom au deck.";
+    }
+    for (int i = 0; i < termControllers.length; i++) {
+      if (termControllers[i].text.trim().isEmpty !=
+          definitionControllers[i].text.trim().isEmpty) {
+        return "Complète ou supprime les cartes incomplètes.";
+      }
+    }
+    for (int i = 0; i < selectedExistingCards.length; i++) {
+      if (selectedExistingCards[i].termController.text.trim().isEmpty ||
+          selectedExistingCards[i].definitionController.text.trim().isEmpty) {
+        return "Complète ou supprime les cartes incomplètes.";
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -279,9 +302,16 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
           ),
           IconButton(
             onPressed: () async {
-              await _saveDeck();
-              if (context.mounted) {
-                Navigator.pop(context);
+              final error = _validationError();
+              if (error != null) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(error)));
+              } else {
+                await _saveDeck();
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
               }
             },
             icon: const Icon(Icons.check),
