@@ -1,5 +1,13 @@
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:flashcard_app/database/card_repository.dart';
+import 'package:flashcard_app/database/deck_card_repository.dart';
 import 'package:flashcard_app/model/app_clock.dart';
+import 'package:flashcard_app/model/card.dart';
+import 'package:flashcard_app/model/deck_card.dart';
 import 'package:flashcard_app/model/deck_review_info.dart';
+import 'package:flashcard_app/model/deck_share.dart';
 import 'package:flashcard_app/page/create_deck_page.dart';
 import 'package:flashcard_app/widget/deck_search_view.dart';
 import 'package:flashcard_app/widget/deck_tile.dart';
@@ -39,6 +47,58 @@ class _HomePageState extends State<HomePage> {
       allDecks = decks;
       reviewInfos = infos;
     });
+  }
+
+  Future<void> _importDeck() async {
+    PlatformFile? pickedFile = await FilePicker.pickFile(
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+    );
+    if (pickedFile == null) return;
+    final bytes = await pickedFile.readAsBytes();
+    final text = utf8.decode(bytes, allowMalformed: true);
+    final shared = DeckShare.decode(text);
+    if (!mounted) return;
+    if (shared == null || shared.cards.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Ce fichier n'est pas un deck valide.")),
+      );
+      return;
+    }
+    final DateTime now = DateTime.now();
+    final savedDeck = await DeckRepository().create(
+      Deck(
+        name: shared.name,
+        createdTime: now,
+        deckType: shared.deckType,
+        termLanguage: shared.termLanguage,
+        definitionLanguage: shared.definitionLanguage,
+      ),
+    );
+    CardRepository cardRepository = CardRepository();
+    for (final pair in shared.cards) {
+      final flashcard = Flashcard(
+        definition: pair.definition,
+        term: pair.term,
+        createdTime: now,
+      );
+      Flashcard savedFlashcard = await cardRepository.create(flashcard);
+      DeckCardLink link = DeckCardLink(
+        deckId: savedDeck.id!,
+        cardId: savedFlashcard.id!,
+        createdTime: now,
+      );
+      await DeckCardRepository().linkCardToDeck(link);
+    }
+    await _loadDecks();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          "Deck importé : ${shared.cards.length} ${(shared.cards.length > 1) ? "cartes" : "carte"}",
+        ),
+      ),
+    );
   }
 
   List<Deck> get decksToReview => allDecks
@@ -117,11 +177,39 @@ class _HomePageState extends State<HomePage> {
         unselectedFontSize: 0,
         onTap: (value) async {
           if (value == 1) {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const CreateDeckPage()),
+            showModalBottomSheet(
+              context: context,
+              builder: (sheetContext) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      title: Text("Créer un deck"),
+                      leading: Icon(Icons.edit),
+                      onTap: () async {
+                        Navigator.pop(sheetContext);
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CreateDeckPage(),
+                          ),
+                        );
+                        _loadDecks();
+                      },
+                    ),
+                    ListTile(
+                      title: Text("Importer un deck"),
+                      leading: Icon(Icons.file_download),
+                      onTap: () async {
+                        Navigator.pop(sheetContext);
+                        _importDeck();
+                      },
+                    ),
+                  ],
+                ),
+              ),
             );
-            _loadDecks();
           } else {
             setState(() {
               currentPage = value;
