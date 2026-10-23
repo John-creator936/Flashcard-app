@@ -3,6 +3,9 @@ import 'package:flashcard_app/model/card.dart';
 import 'package:flashcard_app/model/deck.dart';
 import 'package:flutter/material.dart';
 
+/// Liste des cartes d'un deck, avec des cases à cocher.
+///
+/// Renvoie les cartes cochées quand l'utilisateur valide avec ✓.
 class CardPickerPage extends StatefulWidget {
   final Deck deck;
   const CardPickerPage({super.key, required this.deck});
@@ -12,6 +15,7 @@ class CardPickerPage extends StatefulWidget {
 }
 
 class _CardPickerPageState extends State<CardPickerPage> {
+  /// Ids des cartes cochées. Un `Set` évite les doublons.
   Set<int> selectedCardIds = {};
   List<Flashcard> cards = [];
 

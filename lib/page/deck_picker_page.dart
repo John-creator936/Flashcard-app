@@ -2,6 +2,9 @@ import 'package:flashcard_app/database/deck_repository.dart';
 import 'package:flashcard_app/model/deck.dart';
 import 'package:flutter/material.dart';
 
+/// Liste des decks où choisir celui dont on veut reprendre des cartes.
+///
+/// Renvoie le deck choisi, ou `null` si l'utilisateur revient en arrière.
 class DeckPickerPage extends StatefulWidget {
   const DeckPickerPage({super.key});
 

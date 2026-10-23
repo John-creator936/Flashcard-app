@@ -17,6 +17,10 @@ import 'package:flutter/material.dart';
 import 'package:flashcard_app/model/deck.dart';
 import 'package:flashcard_app/database/deck_repository.dart';
 
+/// Page d'accueil : révisions du jour, liste des decks et progression.
+///
+/// La barre du bas passe de l'accueil à la recherche ; le bouton « + »
+/// ouvre un menu pour créer ou importer un deck.
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -25,11 +29,24 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  /// Onglet affiché : 0 = accueil, 2 = recherche. Le bouton 1 (« + »)
+  /// ouvre un menu sans changer d’onglet.
   int currentPage = 0;
   List<Deck> allDecks = [];
+
+  /// Infos de révision de chaque deck, par id.
   Map<int, DeckReviewInfo> reviewInfos = {};
+
+  /// Nombre de cartes de chaque deck, par id.
   Map<int, int> cardCounts = {};
+
+  /// Chiffres de « Ma progression », `null` tant qu’ils ne sont pas chargés.
   ProgressStats? progressStats;
+
+  /// Decks qui ont au moins une carte à réviser aujourd’hui.
+  List<Deck> get decksToReview => allDecks
+      .where((deck) => reviewInfos[deck.id]?.reviewCards.isNotEmpty ?? false)
+      .toList();
 
   @override
   void initState() {
@@ -37,6 +54,9 @@ class _HomePageState extends State<HomePage> {
     _loadDecks();
   }
 
+  /// Recharge tout ce qu’affiche l’accueil.
+  ///
+  /// Appelée au démarrage et à chaque retour sur la page, pour rester à jour.
   Future<void> _loadDecks() async {
     final decks = await DeckRepository().readAllDecks();
     final now = AppClock.now();
@@ -55,6 +75,9 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  /// Importe un deck depuis un fichier JSON partagé.
+  ///
+  /// Les cartes importées sont de nouvelles cartes, sans progrès.
   Future<void> _importDeck() async {
     PlatformFile? pickedFile = await FilePicker.pickFile(
       type: FileType.custom,
@@ -97,10 +120,6 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
-  List<Deck> get decksToReview => allDecks
-      .where((deck) => reviewInfos[deck.id]?.reviewCards.isNotEmpty ?? false)
-      .toList();
 
   @override
   Widget build(BuildContext context) {

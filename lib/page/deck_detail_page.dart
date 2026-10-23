@@ -12,6 +12,9 @@ import 'package:flashcard_app/widget/study_mode_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
+/// Page d'un deck : ses cartes, le bloc Révision et l'accès aux modes.
+///
+/// Depuis l'AppBar, le deck peut être partagé ou modifié.
 class DeckDetailPage extends StatefulWidget {
   final Deck deck;
   const DeckDetailPage({super.key, required this.deck});
@@ -21,9 +24,13 @@ class DeckDetailPage extends StatefulWidget {
 }
 
 class _DeckDetailPageState extends State<DeckDetailPage> {
+  /// Le deck affiché, rechargé après une modification (nom, type, langues).
   late Deck currentDeck;
+
+  /// Cartes et révisions du deck, null tant qu’elles ne sont pas chargées.
   DeckReviewInfo? info;
 
+  /// Raccourcis vers [info], avec une valeur par défaut pendant le chargement.
   List<Flashcard> get cards => info?.cards ?? [];
   int get dailyLimit => info?.dailyLimit ?? ReviewLimit.defaultLimit;
   int get remainingToday => info?.remainingToday ?? 0;
@@ -36,6 +43,7 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
     _loadCards();
   }
 
+  /// Recharge les cartes et les infos de révision du deck.
   Future<void> _loadCards() async {
     final loadedInfo = await DeckReviewInfo.load(
       widget.deck.id!,
@@ -47,6 +55,7 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
     });
   }
 
+  /// Ouvre un curseur pour régler le nombre de cartes à réviser par jour (5 à 100).
   Future<void> _editDailyLimit() async {
     double sliderValue = dailyLimit.toDouble();
 
@@ -89,6 +98,10 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
     }
   }
 
+  /// Partage le deck en fichier JSON.
+  ///
+  /// Les « / » du nom sont remplacés, car ils ne sont pas permis dans
+  /// un nom de fichier.
   Future<void> _shareDeck() async {
     final text = DeckShare.encode(currentDeck, cards);
     final file = XFile.fromData(
@@ -103,6 +116,8 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
     );
   }
 
+  /// Titre du bloc Révision : le nombre de cartes à réviser,
+  /// ou pourquoi il n’y en a pas.
   String _reviewTitle() {
     if (reviewCards.isNotEmpty) {
       return "${cardCountLabel(reviewCards.length)} à réviser";
