@@ -8,10 +8,7 @@ import 'package:flashcard_app/model/deck_share.dart';
 import 'package:flashcard_app/model/review_limit.dart';
 import 'package:flashcard_app/model/text_utils.dart';
 import 'package:flashcard_app/page/create_deck_page.dart';
-import 'package:flashcard_app/page/flashcard_study_page.dart';
-import 'package:flashcard_app/page/multiple_choice_study_page.dart';
-import 'package:flashcard_app/page/written_study_page.dart';
-import 'package:flashcard_app/widget/review_mode_sheet.dart';
+import 'package:flashcard_app/widget/study_mode_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -161,10 +158,12 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
                   ),
                   ElevatedButton(
                     onPressed: (reviewCards.isNotEmpty)
-                        ? () => showReviewModeSheet(
+                        ? () => showStudyModeSheet(
                             context,
                             deck: currentDeck,
-                            info: info!,
+                            flashcards: info!.reviewCards,
+                            allCards: info!.cards,
+                            isReview: true,
                             onFinished: _loadCards,
                           )
                         : null,
@@ -188,76 +187,8 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            builder: (context) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ListTile(
-                    enabled: cards.isNotEmpty,
-                    title: Text("Mode flashcard"),
-                    subtitle: cards.isNotEmpty
-                        ? null
-                        : Text("Ajoute au moins une carte"),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => FlashcardStudyPage(
-                            flashcards: cards,
-                            deckId: currentDeck.id!,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  ListTile(
-                    enabled: cards.isNotEmpty,
-                    title: Text("Mode écrit"),
-                    subtitle: cards.isNotEmpty
-                        ? null
-                        : Text("Ajoute au moins une carte"),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => WrittenStudyPage(
-                            flashcards: cards,
-                            deckId: currentDeck.id!,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  ListTile(
-                    enabled: cards.length > 1,
-                    title: Text("Mode QCM"),
-                    subtitle: cards.length > 1
-                        ? null
-                        : Text("Il faut au moins 2 cartes"),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => MultipleChoiceStudyPage(
-                            flashcards: cards,
-                            deck: currentDeck,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+        onPressed: () =>
+            showStudyModeSheet(context, deck: currentDeck, flashcards: cards),
         child: Icon(Icons.play_arrow),
       ),
     );

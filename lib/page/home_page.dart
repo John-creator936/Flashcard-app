@@ -12,7 +12,7 @@ import 'package:flashcard_app/widget/deck_search_view.dart';
 import 'package:flashcard_app/widget/deck_tile.dart';
 import 'package:flashcard_app/widget/progress_summary.dart';
 import 'package:flashcard_app/widget/review_deck_tile.dart';
-import 'package:flashcard_app/widget/review_mode_sheet.dart';
+import 'package:flashcard_app/widget/study_mode_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_app/model/deck.dart';
 import 'package:flashcard_app/database/deck_repository.dart';
@@ -131,10 +131,12 @@ class _HomePageState extends State<HomePage> {
                           return ReviewDeckTile(
                             deck: deck,
                             cardCount: info.reviewCards.length,
-                            onTap: () => showReviewModeSheet(
+                            onTap: () => showStudyModeSheet(
                               context,
                               deck: deck,
-                              info: info,
+                              flashcards: info.reviewCards,
+                              allCards: info.cards,
+                              isReview: true,
                               onFinished: _loadDecks,
                             ),
                           );
