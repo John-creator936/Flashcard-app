@@ -4,6 +4,9 @@ import 'package:flashcard_app/model/deck_card.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+/// Connexion unique à la base SQLite de l'app (singleton).
+///
+/// Toute l'app passe par [instance] : la base n'est ouverte qu'une fois.
 class AppDatabase {
   static final AppDatabase instance = AppDatabase._init();
 
@@ -11,6 +14,7 @@ class AppDatabase {
 
   AppDatabase._init();
 
+  /// Renvoie la base, en l'ouvrant au premier appel.
   Future<Database> get database async {
     if (_database != null) return _database!;
 
@@ -18,6 +22,8 @@ class AppDatabase {
     return _database!;
   }
 
+  /// Ouvre la base. [version] doit augmenter à chaque changement de structure,
+  /// pour que [_upgradeDB] soit appelée sur les bases existantes.
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
@@ -31,6 +37,8 @@ class AppDatabase {
     );
   }
 
+  /// Active les clés étrangères, désactivées par défaut dans SQLite :
+  /// sans elles, `ON DELETE CASCADE` ne ferait rien.
   Future _onConfigure(Database db) async {
     await db.execute('PRAGMA foreign_keys = ON');
   }
@@ -90,7 +98,9 @@ CREATE TABLE $tableDecksCard (
   ///
   /// Chaque bloc `if (oldVersion < N)` correspond à une version.
   /// Les anciens blocs ne doivent jamais être modifiés.
+  ///
   /// Version 2 : colonnes de la Révision (SM-2) dans `cards`.
+  ///
   /// Version 3 : type et langues du deck dans `decks`.
   Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
@@ -120,6 +130,7 @@ CREATE TABLE $tableDecksCard (
     }
   }
 
+  /// Ferme la base.
   Future close() async {
     final db = await instance.database;
 

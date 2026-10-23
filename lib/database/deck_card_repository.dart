@@ -4,7 +4,9 @@ import 'package:flashcard_app/model/deck_card.dart';
 import 'package:sqflite/sql.dart';
 import 'app_database.dart';
 
+/// Lecture et écriture des liens entre decks et cartes.
 class DeckCardRepository {
+  /// Ajoute une carte à un deck. Un lien déjà existant est ignoré.
   Future<DeckCardLink> linkCardToDeck(DeckCardLink deckCard) async {
     final db = await AppDatabase.instance.database;
 
@@ -16,6 +18,7 @@ class DeckCardRepository {
     return deckCard;
   }
 
+  /// Retire une carte d'un deck, sans supprimer la carte.
   Future<int> unlinkCardFromDeck(int deckId, int cardId) async {
     final db = await AppDatabase.instance.database;
 
@@ -26,6 +29,9 @@ class DeckCardRepository {
     );
   }
 
+  /// Renvoie le nombre de cartes de chaque deck, sous la forme id → nombre.
+  ///
+  /// Un deck vide n'apparaît pas : utiliser `?? 0`.
   Future<Map<int, int>> countCardsPerDeck() async {
     final db = await AppDatabase.instance.database;
     final rows = await db.rawQuery(
@@ -34,11 +40,12 @@ class DeckCardRepository {
     );
     final Map<int, int> counts = {};
     for (final row in rows) {
-      counts[row['deckId'] as int] = row['cardCount'] as int;
+      counts[row[DeckCardFields.deckId] as int] = row['cardCount'] as int;
     }
     return counts;
   }
 
+  /// Crée une carte et l'ajoute directement à un deck.
   Future<void> createCardInDeck({
     required int deckId,
     required String term,

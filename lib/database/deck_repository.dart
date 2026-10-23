@@ -1,7 +1,9 @@
 import '../model/deck.dart';
 import 'app_database.dart';
 
+/// Lecture et écriture des decks dans la base.
 class DeckRepository {
+  /// Enregistre un nouveau deck et le renvoie avec son id.
   Future<Deck> create(Deck deck) async {
     final db = await AppDatabase.instance.database;
 
@@ -9,6 +11,7 @@ class DeckRepository {
     return deck.copy(id: id);
   }
 
+  /// Lit un deck par son id. Lance une exception s'il n'existe pas.
   Future<Deck> readDeck(int id) async {
     final db = await AppDatabase.instance.database;
 
@@ -26,6 +29,7 @@ class DeckRepository {
     }
   }
 
+  /// Lit tous les decks, du plus récent au plus ancien.
   Future<List<Deck>> readAllDecks() async {
     final db = await AppDatabase.instance.database;
 
@@ -36,6 +40,7 @@ class DeckRepository {
     return result.map((json) => Deck.fromJson(json)).toList();
   }
 
+  /// Met à jour un deck existant.
   Future<int> update(Deck deck) async {
     final db = await AppDatabase.instance.database;
 
@@ -47,6 +52,8 @@ class DeckRepository {
     );
   }
 
+  /// Supprime un deck et ses liens, mais pas ses cartes (qui peuvent être
+  /// dans d'autres decks).
   Future<int> delete(int id) async {
     final db = await AppDatabase.instance.database;
 
