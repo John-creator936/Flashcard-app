@@ -23,4 +23,16 @@ class DeckCardRepository {
       whereArgs: [cardId, deckId],
     );
   }
+
+  Future<Map<int, int>> countCardsPerDeck() async {
+    final db = await AppDatabase.instance.database;
+    final rows = await db.rawQuery(
+      'SELECT deckId, COUNT(*) AS cardCount FROM decks_cards GROUP BY deckId',
+    );
+    final Map<int, int> counts = {};
+    for (final row in rows) {
+      counts[row['deckId'] as int] = row['cardCount'] as int;
+    }
+    return counts;
+  }
 }

@@ -28,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   int currentPage = 0;
   List<Deck> allDecks = [];
   Map<int, DeckReviewInfo> reviewInfos = {};
+  Map<int, int> cardCounts = {};
 
   @override
   void initState() {
@@ -42,10 +43,12 @@ class _HomePageState extends State<HomePage> {
     for (final deck in decks) {
       infos[deck.id!] = await DeckReviewInfo.load(deck.id!, now);
     }
+    final counts = await DeckCardRepository().countCardsPerDeck();
     if (!mounted) return;
     setState(() {
       allDecks = decks;
       reviewInfos = infos;
+      cardCounts = counts;
     });
   }
 
@@ -148,7 +151,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 SizedBox(height: 60),
                 Text(
-                  "Unités récentes",
+                  "Mes unités",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 10),
@@ -162,6 +165,7 @@ class _HomePageState extends State<HomePage> {
                       return DeckTile(
                         deck: allDecks[index],
                         onDeckChanged: _loadDecks,
+                        cardCount: cardCounts[allDecks[index].id!] ?? 0,
                       );
                     },
                     separatorBuilder: (context, index) {
