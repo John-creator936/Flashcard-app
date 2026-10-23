@@ -156,7 +156,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 SizedBox(height: 10),
                 SizedBox(
-                  height: 200,
+                  height: 160,
                   child: ListView.separated(
                     itemCount: allDecks.length,
                     scrollDirection: Axis.horizontal,

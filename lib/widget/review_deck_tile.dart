@@ -17,19 +17,26 @@ class ReviewDeckTile extends StatelessWidget {
     return SizedBox(
       width: 150,
       child: Card(
+        color: Colors.white,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(12),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(deck.name, maxLines: 2, overflow: TextOverflow.ellipsis),
                 Text(
-                  "$cardCount ${(cardCount == 1) ? "carte" : "cartes"}",
-                  style: TextStyle(fontSize: 12),
+                  deck.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+                Text("$cardCount à revoir", style: TextStyle(fontSize: 12)),
               ],
             ),
           ),

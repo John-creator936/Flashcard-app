@@ -43,6 +43,9 @@ class DeckTile extends StatelessWidget {
 
   String get _subtitle {
     if (deck.deckType == 'translation') {
+      if (deck.termLanguage == null && deck.definitionLanguage == null) {
+        return 'Vocabulaire';
+      }
       return 'Vocabulaire · ${deck.termLanguage ?? '?'} → ${deck.definitionLanguage ?? '?'}';
     }
     if (deck.deckType == 'definition') {
@@ -53,49 +56,52 @@ class DeckTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => DeckDetailPage(deck: deck)),
-        );
-        onDeckChanged();
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        width: 300,
-        height: 190,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          color: Colors.white,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return SizedBox(
+      width: 220,
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        color: Colors.white,
+        child: InkWell(
+          onTap: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DeckDetailPage(deck: deck),
+              ),
+            );
+            onDeckChanged();
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Text(
-                    deck.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        deck.name,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                  ),
+                    IconButton(
+                      onPressed: () => _confirmDelete(context),
+                      icon: Icon(Icons.delete_outline),
+                    ),
+                  ],
                 ),
-                IconButton(
-                  onPressed: () => _confirmDelete(context),
-                  icon: Icon(Icons.delete_outline),
+                Text(
+                  _subtitle,
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
+                Spacer(),
+                Text("$cardCount ${(cardCount > 1) ? "cartes" : "carte"}"),
               ],
             ),
-            Text(
-              _subtitle,
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-            ),
-            Spacer(),
-            Text("$cardCount ${(cardCount > 1) ? "cartes" : "carte"}"),
-          ],
+          ),
         ),
       ),
     );
