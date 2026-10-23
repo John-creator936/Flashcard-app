@@ -36,7 +36,7 @@ class ReviewScheduler {
     int limit,
   ) {
     List<Flashcard> dueCards = cards.where((card) => isDue(card, now)).toList();
-    // Tri décroissant
+    // Du plus grand retard au plus petit
     dueCards.sort(
       (a, b) => overdueRatio(b, now).compareTo(overdueRatio(a, now)),
     );

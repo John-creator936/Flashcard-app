@@ -1,13 +1,23 @@
 import 'dart:math';
 
+/// Une règle reçoit un mot et renvoie une variante fautive,
+/// ou `null` si elle ne s'applique pas à ce mot.
 typedef SpellingRule = String? Function(String word);
 
+/// Fabrique des fautes d'orthographe plausibles pour les pièges du QCM.
+///
+/// Chaque règle ne s'applique que si son motif existe dans le mot
+/// (une consonne doublée, un accent, « ie »…). Les règles générales
+/// servent pour toutes les langues, puis s'ajoutent celles de la langue
+/// de la réponse.
 class SpellingErrors {
   static const _vowels = 'aeiouyàâäéèêëîïôöûüù';
 
   /// Lettres qui ne sont presque jamais doublées en français, allemand et anglais
   /// (observation, et non une règle tirée d'une source).
   static const _neverDoubled = 'hjqwxy';
+
+  /// Accents souvent confondus, avec leurs remplacements possibles.
   static const Map<String, List<String>> _accentConfusions = {
     'é': ['e', 'è', 'ê'],
     'è': ['e', 'é'],
@@ -18,18 +28,11 @@ class SpellingErrors {
     'ö': ['o'],
     'ü': ['u'],
   };
+
+  /// Nombre maximal d’essais, pour ne jamais boucler sans fin sur un mot trop court.
   static const _maxAttempts = 20;
 
-  static String? toggleFirstLetterCase(String word) {
-    if (word.isEmpty) return null;
-    final firstLetter = word[0];
-    final toggledLetter = (firstLetter == firstLetter.toUpperCase())
-        ? firstLetter.toLowerCase()
-        : firstLetter.toUpperCase();
-    if (toggledLetter == firstLetter) return null;
-    final rest = word.substring(1);
-    return toggledLetter + rest;
-  }
+  // Outils
 
   static bool _isVowel(String letter) =>
       (_vowels.contains(letter.toLowerCase()));
@@ -44,6 +47,67 @@ class SpellingErrors {
   static String? _pickRandom(List<String> possibleErrors) {
     if (possibleErrors.isEmpty) return null;
     return possibleErrors[Random().nextInt(possibleErrors.length)];
+  }
+
+  static List<String> _replaceEachOccurrence(
+    String word,
+    String from,
+    String to,
+  ) {
+    final List<String> variants = [];
+    final lowerWord = word.toLowerCase();
+    int i = lowerWord.indexOf(from);
+    while (i != -1) {
+      final bool isUpper = word[i] != lowerWord[i];
+      final replacement = isUpper ? to[0].toUpperCase() + to.substring(1) : to;
+      variants.add(
+        word.substring(0, i) + replacement + word.substring(i + from.length),
+      );
+      i = lowerWord.indexOf(from, i + 1);
+    }
+    return variants;
+  }
+
+  static String? _replaceAtEnd(
+    String word,
+    String from,
+    String to, {
+    int minPrefix = 0,
+  }) {
+    if (word.length - from.length >= minPrefix) {
+      final lowerWord = word.toLowerCase();
+      if (lowerWord.endsWith(from)) {
+        int i = word.length - from.length;
+        return word.substring(0, i) + to;
+      }
+    }
+    return null;
+  }
+
+  static String? _replaceAtStart(String word, String from, String to) {
+    final lowerWord = word.toLowerCase();
+    if (lowerWord.startsWith(from)) {
+      final bool isUpper = word[0] != lowerWord[0];
+      String result = to + word.substring(from.length);
+      if (isUpper && result.isNotEmpty) {
+        result = result[0].toUpperCase() + result.substring(1);
+      }
+      return result;
+    }
+    return null;
+  }
+
+  // Règles générales
+
+  static String? toggleFirstLetterCase(String word) {
+    if (word.isEmpty) return null;
+    final firstLetter = word[0];
+    final toggledLetter = (firstLetter == firstLetter.toUpperCase())
+        ? firstLetter.toLowerCase()
+        : firstLetter.toUpperCase();
+    if (toggledLetter == firstLetter) return null;
+    final rest = word.substring(1);
+    return toggledLetter + rest;
   }
 
   static String? toggleDoubleConsonant(String word) {
@@ -83,25 +147,6 @@ class SpellingErrors {
     return _pickRandom(possibleErrors);
   }
 
-  static List<String> _replaceEachOccurrence(
-    String word,
-    String from,
-    String to,
-  ) {
-    final List<String> variants = [];
-    final lowerWord = word.toLowerCase();
-    int i = lowerWord.indexOf(from);
-    while (i != -1) {
-      final bool isUpper = word[i] != lowerWord[i];
-      final replacement = isUpper ? to[0].toUpperCase() + to.substring(1) : to;
-      variants.add(
-        word.substring(0, i) + replacement + word.substring(i + from.length),
-      );
-      i = lowerWord.indexOf(from, i + 1);
-    }
-    return variants;
-  }
-
   static String? toggleIeEi(String word) => _pickRandom([
     ..._replaceEachOccurrence(word, 'ie', 'ei'),
     ..._replaceEachOccurrence(word, 'ei', 'ie'),
@@ -115,6 +160,8 @@ class SpellingErrors {
     ).where((variant) => !variant.contains('phf') && !variant.contains('fph')),
     ..._replaceEachOccurrence(word, 'ph', 'f'),
   ]);
+
+  // Règles de réserve
 
   static String? deleteLetter(String word) {
     final List<String> possibleErrors = [];
@@ -137,34 +184,7 @@ class SpellingErrors {
     return _pickRandom(possibleErrors);
   }
 
-  static String? _replaceAtEnd(
-    String word,
-    String from,
-    String to, {
-    int minPrefix = 0,
-  }) {
-    if (word.length - from.length >= minPrefix) {
-      final lowerWord = word.toLowerCase();
-      if (lowerWord.endsWith(from)) {
-        int i = word.length - from.length;
-        return word.substring(0, i) + to;
-      }
-    }
-    return null;
-  }
-
-  static String? _replaceAtStart(String word, String from, String to) {
-    final lowerWord = word.toLowerCase();
-    if (lowerWord.startsWith(from)) {
-      final bool isUpper = word[0] != lowerWord[0];
-      String result = to + word.substring(from.length);
-      if (isUpper && result.isNotEmpty) {
-        result = result[0].toUpperCase() + result.substring(1);
-      }
-      return result;
-    }
-    return null;
-  }
+  // Allemand
 
   static String? addUmlaut(String word) => _pickRandom([
     ..._replaceEachOccurrence(word, 'a', 'ä'),
@@ -196,6 +216,8 @@ class SpellingErrors {
           !variant.toLowerCase().contains('fv'),
     ),
   ]);
+
+  // Français
 
   static String? dropSilentLetter(String word) => _pickRandom(
     [
@@ -242,6 +264,8 @@ class SpellingErrors {
           ],
   );
 
+  // Anglais
+
   static String? dropEnglishSilentLetter(String word) => _pickRandom(
     [
       _replaceAtEnd(word, 'mb', 'm'),
@@ -257,6 +281,8 @@ class SpellingErrors {
       _replaceAtEnd(word, 'ible', 'able', minPrefix: 3),
     ].whereType<String>().toList(),
   );
+
+  // Générateur
 
   static const List<SpellingRule> _mainRules = [
     toggleFirstLetterCase,
