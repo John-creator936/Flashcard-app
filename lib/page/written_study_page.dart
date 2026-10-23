@@ -9,6 +9,9 @@ import 'package:flashcard_app/widget/study_options_sheet.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+/// Mode écrit : l'utilisateur tape la réponse au lieu de la choisir.
+///
+/// Sert à l'entraînement libre et, avec [isReview], à la Révision.
 class WrittenStudyPage extends StatefulWidget {
   final List<Flashcard> flashcards;
   final int deckId;
@@ -25,6 +28,13 @@ class WrittenStudyPage extends StatefulWidget {
 }
 
 class _WrittenStudyPageState extends State<WrittenStudyPage> {
+  /// Nom du mode dans les clés de session.
+  static const _mode = 'written';
+
+  /// Poids SM-2 du mode écrit : le plus élevé, car taper la réponse
+  /// est plus difficile que la reconnaître.
+  static const _weight = 1.0;
+
   late List<Flashcard> studyCards;
   List<Flashcard> failedCards = [];
   StudyOptions options = const StudyOptions();
@@ -32,10 +42,19 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
   TextEditingController answerController = TextEditingController();
   bool? isCorrect;
   bool isFinished = false;
-  static const _mode = 'written';
-  static const _weight = 1.0;
   bool isLoading = true;
+
+  /// Vrai pendant le tour des cartes ratées, qui ne compte pas pour le progrès SM-2.
   bool isRetryRound = false;
+
+  /// Question et réponse attendue de la carte actuelle, inversées
+  /// si l’option est active.
+  String get questionText => options.reversed
+      ? studyCards[currentCardIndex].definition
+      : studyCards[currentCardIndex].term;
+  String get expectedAnswer => options.reversed
+      ? studyCards[currentCardIndex].term
+      : studyCards[currentCardIndex].definition;
 
   @override
   void initState() {
@@ -50,6 +69,7 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
     super.dispose();
   }
 
+  /// Compare la réponse tapée avec la réponse attendue.
   void _checkAnswer() {
     setState(() {
       isCorrect = AnswerChecker.isCorrect(
@@ -59,6 +79,10 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
     });
   }
 
+  /// Passe à la carte suivante.
+  ///
+  /// En Révision, enregistre d’abord le progrès SM-2 ;
+  /// en entraînement libre, enregistre la session.
   void _nextCard() {
     if (widget.isReview && !isRetryRound) {
       Flashcard updatedCard = SM2.review(
@@ -86,6 +110,8 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
       } else if (failedCards.isEmpty) {
         StudySession.clear(widget.deckId, _mode);
       } else {
+        // Session terminée avec des échecs : la prochaine fois, on reprend
+        // seulement les cartes ratées.
         StudySession(
           studyCardIds: failedCards.map((flashcard) => flashcard.id!).toList(),
           currentCardIndex: 0,
@@ -98,6 +124,10 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
     }
   }
 
+  /// Applique les nouvelles options.
+  ///
+  /// Le mélange ne touche que les cartes restantes :
+  /// la partie déjà étudiée reste intacte.
   void _onOptionsChanged(StudyOptions newOptions) {
     setState(() {
       if (options.shuffled == false && newOptions.shuffled == true) {
@@ -130,6 +160,7 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
     _saveSession();
   }
 
+  /// Commence un nouveau tour avec [cards], mélangées si l’option est active.
   void _startRound(List<Flashcard> cards, {required bool isRetry}) {
     setState(() {
       isRetryRound = isRetry;
@@ -146,6 +177,8 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
     _saveSession();
   }
 
+  /// Charge les options du deck et reprend la session précédente,
+  /// si le deck n’a pas changé depuis.
   Future<void> _loadOptions() async {
     final loadedOptions = await StudyOptions.load(widget.deckId);
     final session = widget.isReview
@@ -182,6 +215,7 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
     });
   }
 
+  /// Enregistre l’avancement, sauf en Révision (qui ne se reprend pas).
   void _saveSession() {
     if (widget.isReview) return;
     StudySession(
@@ -192,16 +226,11 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
     ).save(widget.deckId, _mode);
   }
 
+  /// Relance un tour avec les cartes ratées, ou avec tout le deck.
   void _retryFailedCards() => _startRound(failedCards, isRetry: true);
   void _resetSession() => _startRound(widget.flashcards, isRetry: false);
 
-  String get questionText => options.reversed
-      ? studyCards[currentCardIndex].definition
-      : studyCards[currentCardIndex].term;
-  String get expectedAnswer => options.reversed
-      ? studyCards[currentCardIndex].term
-      : studyCards[currentCardIndex].definition;
-
+  /// Affiche le chargement, l’écran de fin ou la carte actuelle.
   Widget _buildBody() {
     if (isLoading) {
       return Center(child: CircularProgressIndicator());

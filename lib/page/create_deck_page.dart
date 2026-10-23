@@ -14,6 +14,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
+/// Page de création ou de modification d'un deck.
+///
+/// Sans [existingDeck], un nouveau deck est créé ; sinon, ses cartes sont
+/// chargées et peuvent être modifiées, retirées ou complétées.
 class CreateDeckPage extends StatefulWidget {
   final Deck? existingDeck;
   const CreateDeckPage({super.key, this.existingDeck});
@@ -24,8 +28,13 @@ class CreateDeckPage extends StatefulWidget {
 
 class _CreateDeckPageState extends State<CreateDeckPage> {
   final TextEditingController titleController = TextEditingController();
+
+  /// Champs des nouvelles cartes : un terme et une définition par carte,
+  /// au même index dans les deux listes.
   final List<TextEditingController> termControllers = [];
   final List<TextEditingController> definitionControllers = [];
+
+  /// Cartes déjà en base : celles du deck modifié et celles piochées ailleurs.
   final List<EditableExistingCard> selectedExistingCards = [];
   late String deckType;
   String? termLanguage;
@@ -43,29 +52,6 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
     }
   }
 
-  Future<void> _loadExistingDeckCards() async {
-    final loadedCards = await CardRepository().readCardsByDeck(
-      widget.existingDeck!.id!,
-    );
-    if (!mounted) return;
-    setState(() {
-      final List<EditableExistingCard> editableExistingCards = loadedCards
-          .map((loadedCard) => EditableExistingCard(loadedCard))
-          .toList();
-      selectedExistingCards.addAll(editableExistingCards);
-    });
-  }
-
-  void _addCard() {
-    setState(() {
-      final TextEditingController termController = TextEditingController();
-      final TextEditingController definitionController =
-          TextEditingController();
-      termControllers.add(termController);
-      definitionControllers.add(definitionController);
-    });
-  }
-
   @override
   void dispose() {
     titleController.dispose();
@@ -80,6 +66,31 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
       selectedExistingCard.definitionController.dispose();
     }
     super.dispose();
+  }
+
+  /// Charge les cartes du deck modifié pour pouvoir les éditer.
+  Future<void> _loadExistingDeckCards() async {
+    final loadedCards = await CardRepository().readCardsByDeck(
+      widget.existingDeck!.id!,
+    );
+    if (!mounted) return;
+    setState(() {
+      final List<EditableExistingCard> editableExistingCards = loadedCards
+          .map((loadedCard) => EditableExistingCard(loadedCard))
+          .toList();
+      selectedExistingCards.addAll(editableExistingCards);
+    });
+  }
+
+  /// Ajoute une nouvelle carte vide.
+  void _addCard() {
+    setState(() {
+      final TextEditingController termController = TextEditingController();
+      final TextEditingController definitionController =
+          TextEditingController();
+      termControllers.add(termController);
+      definitionControllers.add(definitionController);
+    });
   }
 
   /// Enregistre le deck en cours de création ou de modification.
@@ -146,6 +157,7 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
     }
   }
 
+  /// Pioche des cartes dans un autre deck : choix du deck, puis des cartes.
   Future<void> _pickExistingCards() async {
     final Deck? chosenDeck = await Navigator.push(
       context,
@@ -171,6 +183,10 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
     }
   }
 
+  /// Lit une photo de liste de vocabulaire et ajoute les cartes reconnues.
+  ///
+  /// Les cartes ne sont pas enregistrées tout de suite : l’utilisateur les
+  /// vérifie d’abord.
   Future<void> _scanVocabulary() async {
     final XFile? pickedFile = await ImagePicker().pickImage(
       source: ImageSource.gallery,
@@ -220,6 +236,11 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
     );
   }
 
+  /// Renvoie le message à afficher si le deck ne peut pas être enregistré,
+  /// ou `null` s’il est valide.
+  ///
+  /// Une nouvelle carte entièrement vide est acceptée
+  /// (elle sera ignorée), mais pas une carte remplie d’un seul côté.
   String? _validationError() {
     if (titleController.text.trim().isEmpty) {
       return "Donne un nom au deck.";
@@ -330,6 +351,7 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
                 ),
                 onDismissed: (direction) async {
                   if (widget.existingDeck != null) {
+                    // En modification, le lien est supprimé tout de suite, sans attendre ✓.
                     await DeckCardRepository().unlinkCardFromDeck(
                       widget.existingDeck!.id!,
                       selectedExistingCards[index].original.id!,
@@ -363,10 +385,10 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
                     final removedTermController = termControllers.removeAt(
                       index,
                     );
-                    final removedDefinitonController = definitionControllers
+                    final removedDefinitionController = definitionControllers
                         .removeAt(index);
                     removedTermController.dispose();
-                    removedDefinitonController.dispose();
+                    removedDefinitionController.dispose();
                   });
                 },
                 child: FlashcardInput(

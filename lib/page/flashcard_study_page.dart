@@ -8,6 +8,10 @@ import 'package:flashcard_app/widget/study_options_sheet.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+/// Mode flashcard : la carte se retourne d'un tap, puis l'utilisateur la
+/// glisse à droite s'il la connaissait, ou à gauche sinon.
+///
+/// Sert à l'entraînement libre et, avec [isReview], à la Révision.
 class FlashcardStudyPage extends StatefulWidget {
   final List<Flashcard> flashcards;
   final int deckId;
@@ -24,15 +28,24 @@ class FlashcardStudyPage extends StatefulWidget {
 }
 
 class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
+  /// Nom du mode dans les clés de session.
+  static const _mode = 'flashcard';
+
+  /// Poids SM-2 du mode flashcard : l’utilisateur juge lui-même s’il
+  /// connaissait la réponse.
+  static const _weight = 0.5;
+
   late List<Flashcard> studyCards;
   List<Flashcard> failedCards = [];
   StudyOptions options = const StudyOptions();
   int currentCardIndex = 0;
+
+  /// Vrai quand la carte montre son verso.
   bool isFlipped = false;
   bool isFinished = false;
-  static const _mode = 'flashcard';
-  static const _weight = 0.5;
   bool isLoading = true;
+
+  /// Vrai pendant le tour des cartes ratées, qui ne compte pas pour le progrès SM-2.
   bool isRetryRound = false;
 
   @override
@@ -42,6 +55,10 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
     _loadOptions();
   }
 
+  /// Classe la carte actuelle, connue ou non, puis passe à la suivante.
+  ///
+  /// Remplace `_nextCard` des autres modes, et suit les mêmes règles
+  /// (SM-2 en Révision, session en entraînement libre).
   void _classifyCard(bool isKnown) {
     if (widget.isReview && !isRetryRound) {
       Flashcard updatedCard = SM2.review(
@@ -68,6 +85,8 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
       } else if (failedCards.isEmpty) {
         StudySession.clear(widget.deckId, _mode);
       } else {
+        // Session terminée avec des échecs : la prochaine fois, on reprend
+        // seulement les cartes ratées.
         StudySession(
           studyCardIds: failedCards.map((flashcard) => flashcard.id!).toList(),
           currentCardIndex: 0,
@@ -82,6 +101,11 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
 
   // TODO: factoriser cette logique de mélange et de retour à l'ordre d'origine,
   // répétée dans les trois pages de mode (flashcard, écrit, QCM).
+
+  /// Applique les nouvelles options.
+  ///
+  /// Le mélange ne touche que les cartes restantes :
+  /// la partie déjà étudiée reste intacte.
   void _onOptionsChanged(StudyOptions newOptions) {
     setState(() {
       if (options.shuffled == false && newOptions.shuffled == true) {
@@ -111,6 +135,7 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
     _saveSession();
   }
 
+  /// Commence un nouveau tour avec [cards], mélangées si l’option est active.
   void _startRound(List<Flashcard> cards, {required bool isRetry}) {
     setState(() {
       isRetryRound = isRetry;
@@ -126,9 +151,8 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
     _saveSession();
   }
 
-  void _retryFailedCards() => _startRound(failedCards, isRetry: true);
-  void _resetSession() => _startRound(widget.flashcards, isRetry: false);
-
+  /// Charge les options du deck et reprend la session précédente,
+  /// si le deck n’a pas changé depuis.
   Future<void> _loadOptions() async {
     final loadedOptions = await StudyOptions.load(widget.deckId);
     final session = widget.isReview
@@ -165,6 +189,7 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
     });
   }
 
+  /// Enregistre l’avancement, sauf en Révision (qui ne se reprend pas).
   void _saveSession() {
     if (widget.isReview) return;
     StudySession(
@@ -175,6 +200,11 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
     ).save(widget.deckId, _mode);
   }
 
+  /// Relance un tour avec les cartes ratées, ou avec tout le deck.
+  void _retryFailedCards() => _startRound(failedCards, isRetry: true);
+  void _resetSession() => _startRound(widget.flashcards, isRetry: false);
+
+  /// Affiche le chargement, l’écran de fin ou la carte actuelle.
   Widget _buildBody() {
     if (isLoading) {
       return Center(child: CircularProgressIndicator());
@@ -223,6 +253,8 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
                     borderRadius: BorderRadius.circular(15),
                     color: Colors.white,
                   ),
+                  // Verso affiché si la carte est retournée, sauf si l'inversion est active
+                  // (dans ce cas, c'est l'inverse).
                   child: (isFlipped != options.reversed)
                       ? Text(
                           studyCards[currentCardIndex].definition,
