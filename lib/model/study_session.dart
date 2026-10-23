@@ -1,5 +1,10 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// L'avancement d'une session d'entraînement, pour la reprendre plus tard.
+///
+/// Une session par deck et par mode. [deckCardIds] garde les cartes du deck
+/// au moment de l'enregistrement : si le deck a changé depuis, la session
+/// n'est plus valable et on recommence à zéro.
 class StudySession {
   final List<int> studyCardIds;
   final int currentCardIndex;
@@ -15,6 +20,8 @@ class StudySession {
 
   static String _prefix(int deckId, String mode) => 'session_${deckId}_$mode';
 
+  /// Enregistre la session. `shared_preferences` ne connaît pas les listes
+  /// d'entiers, d'où la conversion des ids en texte.
   Future<void> save(int deckId, String mode) async {
     final prefs = await SharedPreferences.getInstance();
     final prefix = _prefix(deckId, mode);
@@ -33,6 +40,7 @@ class StudySession {
     );
   }
 
+  /// Lit la session d'un deck et d'un mode, ou `null` s'il n'y en a pas.
   static Future<StudySession?> load(int deckId, String mode) async {
     final prefs = await SharedPreferences.getInstance();
     final prefix = _prefix(deckId, mode);
@@ -53,6 +61,7 @@ class StudySession {
     );
   }
 
+  /// Efface la session, par exemple quand elle est terminée sans échec.
   static Future<void> clear(int deckId, String mode) async {
     final prefs = await SharedPreferences.getInstance();
     final prefix = _prefix(deckId, mode);

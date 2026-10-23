@@ -1,5 +1,7 @@
+/// Nom de la table des cartes.
 final String tableCards = 'cards';
 
+/// Noms des colonnes de la table `cards`.
 class CardFields {
   static final List<String> values = [
     id,
@@ -22,14 +24,25 @@ class CardFields {
   static final String lastReviewedTime = 'lastReviewedTime';
 }
 
+/// Une carte : un terme, sa définition et son progrès SM-2.
+///
+/// Le nom évite le conflit avec le widget `Card` de Material.
 class Flashcard {
   final int? id;
   final String term;
   final String definition;
   final DateTime createdTime;
+
+  /// Facteur de facilité SM-2 : plus il est grand, plus l'intervalle grandit vite.
   final double easeFactor;
+
+  /// Points gagnés depuis le dernier échec, selon le poids de chaque mode.
   final double points;
+
+  /// Nombre de jours avant la prochaine révision.
   final double intervalDays;
+
+  /// Date de la dernière révision, ou `null` si la carte est nouvelle.
   final DateTime? lastReviewedTime;
 
   const Flashcard({
@@ -43,6 +56,7 @@ class Flashcard {
     this.lastReviewedTime,
   });
 
+  /// Copie la carte en remplaçant seulement les champs donnés.
   Flashcard copy({
     int? id,
     String? term,
@@ -63,6 +77,7 @@ class Flashcard {
     lastReviewedTime: lastReviewedTime ?? this.lastReviewedTime,
   );
 
+  /// Crée une carte à partir d'une ligne de la base.
   static Flashcard fromJson(Map<String, Object?> json) => Flashcard(
     id: json[CardFields.id] as int?,
     term: json[CardFields.term] as String,
@@ -76,6 +91,7 @@ class Flashcard {
         : DateTime.parse(json[CardFields.lastReviewedTime] as String),
   );
 
+  /// Convertit la carte en ligne pour la base.
   Map<String, Object?> toJson() => {
     CardFields.id: id,
     CardFields.term: term,

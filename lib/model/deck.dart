@@ -1,10 +1,14 @@
+/// Nom de la table des decks.
 final String tableDecks = 'decks';
+
+/// Langues proposées pour un deck de vocabulaire, avec leur nom affiché.
 const Map<String, String> deckLanguages = {
   'fr': 'Français',
   'de': 'Allemand',
   'en': 'Anglais',
 };
 
+/// Noms des colonnes de la table `decks`.
 class DeckFields {
   static final List<String> values = [
     id,
@@ -23,6 +27,11 @@ class DeckFields {
   static final String definitionLanguage = 'definitionLanguage';
 }
 
+/// Un deck : un nom, un type et, pour le vocabulaire, une langue par côté.
+///
+/// [deckType] vaut 'translation' (vocabulaire), 'definition' ou 'other'
+/// (réponses courtes). Il décide si le QCM peut proposer des pièges
+/// d'orthographe.
 class Deck {
   final int? id;
   final String name;
@@ -40,6 +49,7 @@ class Deck {
     this.definitionLanguage,
   });
 
+  /// Copie le deck en remplaçant seulement les champs donnés.
   Deck copy({
     int? id,
     String? name,
@@ -56,6 +66,7 @@ class Deck {
     definitionLanguage: definitionLanguage ?? this.definitionLanguage,
   );
 
+  /// Crée un deck à partir d'une ligne de la base.
   static Deck fromJson(Map<String, Object?> json) => Deck(
     id: json[DeckFields.id] as int?,
     name: json[DeckFields.name] as String,
@@ -65,6 +76,7 @@ class Deck {
     definitionLanguage: json[DeckFields.definitionLanguage] as String?,
   );
 
+  /// Convertit le deck en ligne pour la base.
   Map<String, Object?> toJson() => {
     DeckFields.id: id,
     DeckFields.name: name,
