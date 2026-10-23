@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'package:flashcard_app/database/deck_repository.dart';
 import 'package:flashcard_app/model/app_clock.dart';
 import 'package:flashcard_app/model/card.dart';
 import 'package:flashcard_app/model/deck.dart';
 import 'package:flashcard_app/model/deck_review_info.dart';
+import 'package:flashcard_app/model/deck_share.dart';
 import 'package:flashcard_app/model/review_limit.dart';
 import 'package:flashcard_app/page/create_deck_page.dart';
 import 'package:flashcard_app/page/flashcard_study_page.dart';
@@ -10,6 +12,7 @@ import 'package:flashcard_app/page/multiple_choice_study_page.dart';
 import 'package:flashcard_app/page/written_study_page.dart';
 import 'package:flashcard_app/widget/review_mode_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 class DeckDetailPage extends StatefulWidget {
   final Deck deck;
@@ -88,6 +91,20 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
     }
   }
 
+  Future<void> _shareDeck() async {
+    final text = DeckShare.encode(currentDeck, cards);
+    final file = XFile.fromData(
+      utf8.encode(text),
+      mimeType: 'application/json',
+    );
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [file],
+        fileNameOverrides: ['${currentDeck.name.replaceAll('/', '-')}.json'],
+      ),
+    );
+  }
+
   String _reviewTitle() {
     if (reviewCards.isNotEmpty) {
       return "${reviewCards.length} ${(reviewCards.length == 1) ? "carte" : "cartes"} à réviser";
@@ -104,6 +121,10 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
       appBar: AppBar(
         title: Text(currentDeck.name),
         actions: [
+          IconButton(
+            onPressed: cards.isEmpty ? null : _shareDeck,
+            icon: Icon(Icons.ios_share),
+          ),
           IconButton(
             onPressed: () async {
               await Navigator.push(
