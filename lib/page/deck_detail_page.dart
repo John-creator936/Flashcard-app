@@ -27,7 +27,7 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
   /// Le deck affiché, rechargé après une modification (nom, type, langues).
   late Deck currentDeck;
 
-  /// Cartes et révisions du deck, null tant qu’elles ne sont pas chargées.
+  /// Cartes et révisions du deck, `null` tant qu’elles ne sont pas chargées.
   DeckReviewInfo? info;
 
   /// Raccourcis vers [info], avec une valeur par défaut pendant le chargement.
