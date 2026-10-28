@@ -88,6 +88,8 @@ class DeckTile extends StatelessWidget {
                     Expanded(
                       child: Text(
                         deck.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
