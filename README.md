@@ -66,6 +66,7 @@ flutter test
 - Algorithme de révision : SM-2 de Piotr Woźniak, adapté avec des poids par mode
 - Claude (Anthropic) : squelettes des parties utilisant `shared_preferences`, ML Kit, `share_plus` et `file_picker`, complétés par moi, ainsi que le code des tests unitaires
 - Chaque fichier concerné l'indique dans un commentaire en haut du fichier ou de la méthode
+- Ce README a été rédigé avec l'aide de Claude (Anthropic), à partir de mes choix et du contenu du rapport
 
 Les autres sources sont citées dans le rapport du travail de maturité.
 
