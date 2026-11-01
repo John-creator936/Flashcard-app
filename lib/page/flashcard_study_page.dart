@@ -220,56 +220,60 @@ class _FlashcardStudyPageState extends State<FlashcardStudyPage> {
     return Center(
       child: Column(
         children: [
-          SizedBox(
-            width: 360,
-            child: Dismissible(
-              key: ValueKey(studyCards[currentCardIndex].id),
-              background: Container(
-                color: Colors.green,
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.only(left: 20),
-                child: const Icon(Icons.check, color: Colors.white),
-              ),
-              secondaryBackground: Container(
-                color: Colors.red,
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: 20),
-                child: const Icon(Icons.close, color: Colors.white),
-              ),
-              onDismissed: (direction) {
-                _classifyCard(direction == DismissDirection.startToEnd);
-              },
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    isFlipped = !isFlipped;
-                  });
-                },
-                child: Container(
-                  width: 360,
-                  height: 600,
-                  alignment: Alignment.center,
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
+              child: Dismissible(
+                key: ValueKey(studyCards[currentCardIndex].id),
+                background: Container(
                   decoration: BoxDecoration(
+                    color: Colors.green,
                     borderRadius: BorderRadius.circular(15),
-                    color: Colors.white,
                   ),
-                  // Verso affiché si la carte est retournée, sauf si l'inversion est active
-                  // (dans ce cas, c'est l'inverse).
-                  child: (isFlipped != options.reversed)
-                      ? Text(
-                          studyCards[currentCardIndex].definition,
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight(400),
-                          ),
-                        )
-                      : Text(
-                          studyCards[currentCardIndex].term,
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight(400),
-                          ),
-                        ),
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.only(left: 20),
+                  child: const Icon(Icons.check, color: Colors.white),
+                ),
+                secondaryBackground: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 20),
+                  child: const Icon(Icons.close, color: Colors.white),
+                ),
+                onDismissed: (direction) {
+                  _classifyCard(direction == DismissDirection.startToEnd);
+                },
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      isFlipped = !isFlipped;
+                    });
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: Colors.white,
+                    ),
+                    // Verso affiché si la carte est retournée, sauf si l'inversion est active
+                    // (dans ce cas, c'est l'inverse).
+                    child: Text(
+                      (isFlipped != options.reversed)
+                          ? studyCards[currentCardIndex].definition
+                          : studyCards[currentCardIndex].term,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),

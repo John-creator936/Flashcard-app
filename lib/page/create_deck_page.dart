@@ -348,7 +348,11 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
                 key: ObjectKey(selectedExistingCards[index]),
                 direction: DismissDirection.endToStart,
                 background: Container(
-                  color: Colors.red,
+                  margin: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   alignment: Alignment.centerRight,
                   padding: const EdgeInsets.only(right: 20),
                   child: const Icon(Icons.delete, color: Colors.white),
@@ -379,7 +383,11 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
                 key: ObjectKey(termControllers[index]),
                 direction: DismissDirection.endToStart,
                 background: Container(
-                  color: Colors.red,
+                  margin: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   alignment: Alignment.centerRight,
                   padding: const EdgeInsets.only(right: 20),
                   child: const Icon(Icons.delete, color: Colors.white),
