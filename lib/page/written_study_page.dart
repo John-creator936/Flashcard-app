@@ -244,42 +244,59 @@ class _WrittenStudyPageState extends State<WrittenStudyPage> {
       );
     }
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(questionText),
-          SizedBox(height: 20),
-          Container(
-            decoration: BoxDecoration(
-              border: (isCorrect == null)
-                  ? null
-                  : Border.all(color: isCorrect! ? Colors.green : Colors.red),
-              color: (isCorrect == null)
-                  ? null
-                  : (isCorrect!
-                        ? Colors.green.withValues(alpha: 0.2)
-                        : Colors.red.withValues(alpha: 0.2)),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(questionText, textAlign: TextAlign.center),
+            SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.only(left: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                border: (isCorrect == null)
+                    ? null
+                    : Border.all(color: isCorrect! ? Colors.green : Colors.red),
+                color: (isCorrect == null)
+                    ? null
+                    : (isCorrect!
+                          ? Colors.green.withValues(alpha: 0.2)
+                          : Colors.red.withValues(alpha: 0.2)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(child: TextField(controller: answerController)),
+                  IconButton(
+                    onPressed: (isCorrect == null) ? _checkAnswer : null,
+                    icon: Icon(Icons.check),
+                  ),
+                ],
+              ),
             ),
-            child: Row(
-              children: [
-                Expanded(child: TextField(controller: answerController)),
-                IconButton(
-                  onPressed: (isCorrect == null) ? _checkAnswer : null,
-                  icon: Icon(Icons.check),
-                ),
-              ],
+            SizedBox(height: 10),
+            Visibility(
+              visible: isCorrect == false,
+              maintainSize: true,
+              maintainAnimation: true,
+              maintainState: true,
+              child: Text(
+                "La bonne réponse était : $expectedAnswer",
+                textAlign: TextAlign.center,
+              ),
             ),
-          ),
-          (isCorrect == false)
-              ? Text("La bonne réponse était : $expectedAnswer")
-              : const SizedBox.shrink(),
-          (isCorrect != null)
-              ? IconButton(
-                  onPressed: _nextCard,
-                  icon: Icon(Icons.navigate_next),
-                )
-              : const SizedBox.shrink(),
-        ],
+            Visibility(
+              visible: isCorrect != null,
+              maintainSize: true,
+              maintainAnimation: true,
+              maintainState: true,
+              child: IconButton(
+                onPressed: _nextCard,
+                icon: Icon(Icons.navigate_next),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

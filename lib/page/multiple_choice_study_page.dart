@@ -308,53 +308,60 @@ class _MultipleChoiceStudyPageState extends State<MultipleChoiceStudyPage> {
       );
     }
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(questionText),
-          SizedBox(height: 50),
-          ...List.generate(
-            choices.length,
-            (index) => GestureDetector(
-              onTap: () {
-                if (selectedChoice == null) {
-                  setState(() {
-                    selectedChoice = choices[index];
-                  });
-                }
-              },
-              child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(20),
-                margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: _colorFor(choices[index]),
-                  border: Border.all(
-                    color: const Color.fromARGB(115, 237, 231, 231),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(questionText),
+            SizedBox(height: 50),
+            ...List.generate(
+              choices.length,
+              (index) => GestureDetector(
+                onTap: () {
+                  if (selectedChoice == null) {
+                    setState(() {
+                      selectedChoice = choices[index];
+                    });
+                  }
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(20),
+                  margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: _colorFor(choices[index]),
+                    border: Border.all(
+                      color: const Color.fromARGB(115, 237, 231, 231),
+                    ),
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                  borderRadius: BorderRadius.circular(15),
+                  child: Text(choices[index]),
                 ),
-                child: Text(choices[index]),
               ),
             ),
-          ),
-          (selectedChoice != null)
-              ? Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 5,
+            Visibility(
+              visible: selectedChoice != null,
+              maintainSize: true,
+              maintainAnimation: true,
+              maintainState: true,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 5,
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _nextCard,
+                    child: Text("Continuer"),
                   ),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _nextCard,
-                      child: Text("Continuer"),
-                    ),
-                  ),
-                )
-              : const SizedBox.shrink(),
-        ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
