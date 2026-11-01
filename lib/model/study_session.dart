@@ -1,3 +1,4 @@
+// Squelette proposé par Claude (Anthropic), complété par moi.
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// L'avancement d'une session d'entraînement, pour la reprendre plus tard.

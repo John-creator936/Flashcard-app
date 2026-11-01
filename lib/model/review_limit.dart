@@ -1,3 +1,4 @@
+// Squelette proposé par Claude (Anthropic), complété par moi.
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Le nombre maximal de cartes à réviser par jour, propre à chaque deck.
