@@ -273,6 +273,7 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
             onPressed: () {
               showModalBottomSheet(
                 context: context,
+                isScrollControlled: true,
                 builder: (context) => DeckSettingsSheet(
                   initialDeckType: deckType,
                   initialTermLanguage: termLanguage,

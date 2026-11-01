@@ -101,3 +101,5 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/icon/icone_memcards_app.png"
   remove_alpha_ios: true
+  adaptive_icon_background: "#6750A4"
+  adaptive_icon_foreground: "assets/icon/icone_memcards_app.png"
