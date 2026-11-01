@@ -29,7 +29,7 @@ MemCards est une application gratuite pour créer ses propres cartes et les étu
 
 ## Installation
 
-**Android** : un APK (pré-version) est disponible dans les [Releases](../../releases).
+**Android** : un APK est disponible dans les [Releases](../../releases/latest).
 
 **iPhone** : l'app n'est pas sur l'App Store, elle doit être compilée depuis Xcode.
 
