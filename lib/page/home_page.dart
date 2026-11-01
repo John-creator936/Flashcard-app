@@ -75,6 +75,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // Squelette proposé par Claude (Anthropic), complété par moi.
   /// Importe un deck depuis un fichier JSON partagé.
   ///
   /// Les cartes importées sont de nouvelles cartes, sans progrès.

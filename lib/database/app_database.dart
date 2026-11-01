@@ -1,3 +1,5 @@
+// Structure inspirée du tutoriel de Johannes Milke (HeyFlutter.com) :
+// https://github.com/JohannesMilke/sqflite_database_example
 import 'package:flashcard_app/model/card.dart';
 import 'package:flashcard_app/model/deck.dart';
 import 'package:flashcard_app/model/deck_card.dart';

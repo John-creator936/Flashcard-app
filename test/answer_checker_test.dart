@@ -1,3 +1,4 @@
+// Tests écrits par Claude (Anthropic), puis relus et vérifiés.
 import 'package:flashcard_app/model/answer_checker.dart';
 import 'package:flutter_test/flutter_test.dart';
 

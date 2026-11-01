@@ -1,3 +1,4 @@
+// Tests écrits par Claude (Anthropic), puis relus et vérifiés.
 import 'package:flashcard_app/model/card.dart';
 import 'package:flashcard_app/model/deck.dart';
 import 'package:flashcard_app/model/deck_share.dart';

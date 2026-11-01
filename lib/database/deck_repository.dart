@@ -1,3 +1,5 @@
+// Structure inspirée du tutoriel de Johannes Milke (HeyFlutter.com) :
+// https://github.com/JohannesMilke/sqflite_database_example
 import '../model/deck.dart';
 import 'app_database.dart';
 

@@ -1,3 +1,6 @@
+// Structure inspirée du tutoriel de Johannes Milke (HeyFlutter.com) :
+// https://github.com/JohannesMilke/sqflite_database_example
+
 /// Nom de la table des decks.
 final String tableDecks = 'decks';
 

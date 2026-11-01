@@ -183,6 +183,7 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
     }
   }
 
+  // Squelette proposé par Claude (Anthropic), complété par moi.
   /// Lit une photo de liste de vocabulaire et ajoute les cartes reconnues.
   ///
   /// Les cartes ne sont pas enregistrées tout de suite : l’utilisateur les

@@ -98,6 +98,7 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
     }
   }
 
+  // Squelette proposé par Claude (Anthropic), complété par moi.
   /// Partage le deck en fichier JSON.
   ///
   /// Les « / » du nom sont remplacés, car ils ne sont pas permis dans

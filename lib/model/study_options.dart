@@ -1,3 +1,4 @@
+// Squelette proposé par Claude (Anthropic), complété par moi.
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Les options d'un mode : inverser les côtés, mélanger, pièges d'orthographe.
