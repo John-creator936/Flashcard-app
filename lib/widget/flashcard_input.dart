@@ -14,11 +14,15 @@ class FlashcardInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Column(
-        children: [
-          TextField(controller: termController),
-          TextField(controller: definitionController),
-        ],
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+        child: Column(
+          children: [
+            TextField(controller: termController),
+            TextField(controller: definitionController),
+          ],
+        ),
       ),
     );
   }

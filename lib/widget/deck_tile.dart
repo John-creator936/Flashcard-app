@@ -64,7 +64,7 @@ class DeckTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 220,
+      width: 260,
       child: Card(
         clipBehavior: Clip.antiAlias,
         color: Colors.white,

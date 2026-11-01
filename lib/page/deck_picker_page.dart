@@ -37,7 +37,10 @@ class _DeckPickerPageState extends State<DeckPickerPage> {
         itemCount: allDecks.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(allDecks[index].name),
+            title: Text(
+              allDecks[index].name,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
             onTap: () {
               Navigator.pop(context, allDecks[index]);
             },

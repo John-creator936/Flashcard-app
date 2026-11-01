@@ -16,7 +16,7 @@ class ReviewDeckTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 150,
+      width: 180,
       child: Card(
         color: Colors.white,
         clipBehavior: Clip.antiAlias,

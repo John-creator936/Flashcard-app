@@ -38,10 +38,13 @@ class _DeckSearchViewState extends State<DeckSearchView> {
     return Column(
       children: [
         SizedBox(height: 60),
-        TextField(
-          controller: searchController,
-          decoration: InputDecoration(labelText: "Barre de recherche"),
-          onChanged: _filterDecks,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: TextField(
+            controller: searchController,
+            decoration: InputDecoration(labelText: "Barre de recherche"),
+            onChanged: _filterDecks,
+          ),
         ),
         Expanded(
           child: ListView.builder(
@@ -49,7 +52,10 @@ class _DeckSearchViewState extends State<DeckSearchView> {
             itemCount: filteredDecks.length,
             itemBuilder: (context, index) {
               return ListTile(
-                title: Text(filteredDecks[index].name),
+                title: Text(
+                  filteredDecks[index].name,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
                 onTap: () {
                   Navigator.push(
                     context,

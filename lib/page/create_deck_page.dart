@@ -265,9 +265,9 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: (widget.existingDeck == null)
-            ? Text("Création")
-            : Text("Modification"),
+        title: Text(
+          (widget.existingDeck == null) ? "Création" : "Modification",
+        ),
         actions: [
           IconButton(
             onPressed: () {
@@ -336,9 +336,12 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            TextField(
-              controller: titleController,
-              decoration: InputDecoration(labelText: "Titre de l'unité"),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: TextField(
+                controller: titleController,
+                decoration: InputDecoration(labelText: "Titre de l'unité"),
+              ),
             ),
             ...List.generate(selectedExistingCards.length, (index) {
               return Dismissible(

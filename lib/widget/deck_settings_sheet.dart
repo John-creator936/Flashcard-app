@@ -57,7 +57,10 @@ class _DeckSettingsSheetState extends State<DeckSettingsSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("Type de deck"),
+          Text(
+            "Type de deck",
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           RadioGroup<String>(
             groupValue: deckType,
             onChanged: (value) {

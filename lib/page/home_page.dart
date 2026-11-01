@@ -203,6 +203,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
       bottomNavigationBar: BottomNavigationBar(
+        currentIndex: currentPage,
         iconSize: 35,
         selectedFontSize: 0,
         unselectedFontSize: 0,
