@@ -4,15 +4,12 @@ import 'package:flashcard_app/database/deck_repository.dart';
 import 'package:flashcard_app/model/card.dart';
 import 'package:flashcard_app/model/deck.dart';
 import 'package:flashcard_app/model/deck_card.dart';
-import 'package:flashcard_app/model/vocabulary_parser.dart';
 import 'package:flashcard_app/page/card_picker_page.dart';
 import 'package:flashcard_app/page/deck_picker_page.dart';
 import 'package:flashcard_app/widget/deck_settings_sheet.dart';
 import 'package:flashcard_app/widget/editable_existing_card.dart';
 import 'package:flashcard_app/widget/flashcard_input.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
 /// Page de création ou de modification d'un deck.
 ///
@@ -183,60 +180,6 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
     }
   }
 
-  // Squelette proposé par Claude (Anthropic), complété par moi.
-  /// Lit une photo de liste de vocabulaire et ajoute les cartes reconnues.
-  ///
-  /// Les cartes ne sont pas enregistrées tout de suite : l’utilisateur les
-  /// vérifie d’abord.
-  Future<void> _scanVocabulary() async {
-    final XFile? pickedFile = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-    );
-    if (pickedFile == null) return;
-    final InputImage inputImage = InputImage.fromFilePath(pickedFile.path);
-    final TextRecognizer textRecognizer = TextRecognizer(
-      script: TextRecognitionScript.latin,
-    );
-    final RecognizedText recognizedText = await textRecognizer.processImage(
-      inputImage,
-    );
-    textRecognizer.close();
-    final List<OcrLine> ocrLines = [];
-    for (final block in recognizedText.blocks) {
-      for (final line in block.lines) {
-        ocrLines.add(
-          OcrLine(
-            text: line.text,
-            left: line.cornerPoints[0].x.toDouble(),
-            top: line.cornerPoints[0].y.toDouble(),
-          ),
-        );
-      }
-    }
-
-    final pairs = VocabularyParser.parse(ocrLines);
-    if (!mounted) return;
-    if (pairs.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Aucun mot reconnu sur cette photo.")),
-      );
-      return;
-    }
-    setState(() {
-      for (final pair in pairs) {
-        termControllers.add(TextEditingController(text: pair.term));
-        definitionControllers.add(TextEditingController(text: pair.definition));
-      }
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          "${pairs.length} ${(pairs.length > 1) ? "cartes ajoutées" : "carte ajoutée"} : vérifie-les avant d'enregistrer.",
-        ),
-      ),
-    );
-  }
-
   /// Renvoie le message à afficher si le deck ne peut pas être enregistré,
   /// ou `null` s’il est valide.
   ///
@@ -290,31 +233,10 @@ class _CreateDeckPageState extends State<CreateDeckPage> {
             },
             icon: Icon(Icons.tune),
           ),
-          PopupMenuButton<String>(
-            icon: Icon(Icons.playlist_add),
-            onSelected: (value) {
-              if (value == 'deck') {
-                _pickExistingCards();
-              } else if (value == 'photo') {
-                _scanVocabulary();
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'deck',
-                child: ListTile(
-                  leading: Icon(Icons.library_add),
-                  title: Text("Depuis un autre deck"),
-                ),
-              ),
-              PopupMenuItem(
-                value: 'photo',
-                child: ListTile(
-                  leading: Icon(Icons.photo_camera),
-                  title: Text("Depuis une photo"),
-                ),
-              ),
-            ],
+          IconButton(
+            onPressed: _pickExistingCards,
+            icon: Icon(Icons.library_add),
+            tooltip: "Voir autres cartes",
           ),
           IconButton(
             onPressed: () async {
