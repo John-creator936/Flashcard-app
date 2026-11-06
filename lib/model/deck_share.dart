@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flashcard_app/model/card.dart';
 import 'package:flashcard_app/model/deck.dart';
-import 'package:flashcard_app/model/vocabulary_parser.dart';
+import 'package:flashcard_app/model/vocabulary_pair.dart';
 
 /// Un deck lu depuis un fichier de partage, pas encore enregistré en base.
 class SharedDeck {

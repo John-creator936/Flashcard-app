@@ -9,14 +9,6 @@ class OcrLine {
   const OcrLine({required this.text, required this.left, required this.top});
 }
 
-/// Un terme et sa définition. Sert à l'OCR et au partage de decks.
-class VocabularyPair {
-  final String term;
-  final String definition;
-
-  const VocabularyPair({required this.term, required this.definition});
-}
-
 /// Transforme les lignes lues sur une page de vocabulaire en paires.
 ///
 /// Conçu pour les listes à deux colonnes (allemand à gauche, français à
