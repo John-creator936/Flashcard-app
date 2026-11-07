@@ -1,0 +1,1 @@
+Version without OCR: the app now only uses free components.

@@ -1,0 +1,15 @@
+MemCards is a free app to create your own cards and study them, designed for students.
+
+Features:
+- Create, edit and delete decks, and reuse a card in several decks
+- Three deck types: vocabulary (one language per side), definitions and short answers
+- Three study modes: flashcard (with swipe), written and multiple choice
+- Options: swap term and definition, shuffle cards, spelling traps in multiple choice
+- Resume your session where you left off
+- Spaced repetition based on the SM-2 algorithm, with a daily limit per deck
+- Share decks as JSON files (export and import)
+
+Privacy:
+MemCards works entirely offline. It does not need Internet access, collects no data, contains no ads and keeps your cards only on your phone.
+
+Free software under the GPL v3 license.
