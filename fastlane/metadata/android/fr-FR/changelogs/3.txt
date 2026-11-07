@@ -1,0 +1,1 @@
+Version sans OCR : l'application n'utilise plus que des composants libres.
